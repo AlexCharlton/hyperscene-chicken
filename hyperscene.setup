@@ -1,0 +1,11 @@
+;; hyperscene.setup -*- scheme -*-
+
+(define compile-options "-d2 -O2")
+
+(compile ,compile-options -I./include/ -J -s hyperscene.scm ./src/*.c)
+(compile ,compile-options -s hyperscene.import.scm)
+
+(install-extension
+ 'hyperscene
+ '("hyperscene.so" "hyperscene.import.so")
+ '((version "0.1.0")))

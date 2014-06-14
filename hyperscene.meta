@@ -1,0 +1,9 @@
+;; hyperscene.meta -*- scheme -*-
+
+((synopsis "Scene graph and spatial partitioning")
+ (author "Alex Charlton")
+ (category graphics)
+ (license "BSD")
+ (depends miscmacros)
+ (test-depends test)
+ (foreign-depends))
