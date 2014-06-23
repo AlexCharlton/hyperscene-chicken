@@ -28,13 +28,24 @@
    rotate-camera!
    set-camera-rotation!
    camera-look-at!
+   pan-camera!
+   set-camera-pan!
+   tilt-camera!
+   set-camera-tilt!
+   zoom-camera!
+   set-camera-zoom!
+   roll-camera!
+   set-camera-roll!
    current-camera-position
    current-camera-projection
    current-camera-model-view
    current-camera-model-view-projection)
 
-(import chicken scheme foreign lolevel)
-(use miscmacros)
+(import chicken scheme foreign)
+(use miscmacros lolevel)
+
+#>#include <hyperscene.h>
+<#
 
 (define *window-size-fun* (lambda () (values 0 0)))
 
@@ -60,9 +71,12 @@
 
 ;;; Scenes
 (define (make-scene)
-  (set-finalizer! ((foreign-lambda c-pointer "hpgDeactiveateScene" c-pointer)
+  (set-finalizer! ((foreign-lambda c-pointer "hpgMakeScene" c-pointer)
                    (aabb-tree-interface))
                   delete-scene))
+
+(define delete-scene
+  (foreign-lambda void "hpgDeleteScene" c-pointer))
 
 (define aabb-tree-interface
   (foreign-lambda c-pointer "hpgAABBpartitionInterface"))
@@ -72,12 +86,6 @@
 
 (define activate-scene
   (foreign-lambda void "hpgActiveateScene" c-pointer))
-
-(define deactivate-scene
-  (foreign-lambda void "hpgDeactiveateScene" c-pointer))
-
-(define delete-scene
-  (foreign-lambda void "hpgDeleteScene" c-pointer))
 
 
 ;;; Nodes
@@ -113,9 +121,10 @@
 (define +ortho+ 0)
 (define +perspective+ 1)
 
-(define (make-camera type scene #!key (near 1) (far 100) (angle 70))
+(define (make-camera type scene #!key (near 0.1) (far 100) (angle 70))
   (let ((camera (set-finalizer!
-                 ((foreign-lambda c-pointer "hpgMakeCamera" unsigned-int c-pointer)
+                 ((foreign-safe-lambda c-pointer "hpgMakeCamera"
+                    unsigned-int c-pointer)
                   (ecase type
                     ((ortho:) +ortho+)
                     ((perspective:) +perspective+))
@@ -129,10 +138,10 @@
   (foreign-lambda void "hpgDeleteCamera" c-pointer))
 
 (define set-camera-clip-planes!
-  (foreign-lambda void "hpgSetCameraClipPlanes" c-pointer float float))
+  (foreign-safe-lambda void "hpgSetCameraClipPlanes" c-pointer float float))
 
 (define set-camera-view-angle!
-  (foreign-lambda void "hpgSetCameraViewAngle" c-pointer float))
+  (foreign-safe-lambda void "hpgSetCameraViewAngle" c-pointer float))
 
 (define render-cameras
   (foreign-lambda void "hpgRenderCameras"))
@@ -141,7 +150,7 @@
   (foreign-lambda void "hpgRenderCamera" c-pointer))
 
 (define resize-cameras
-  (foreign-lambda void "hpgResizeCameras"))
+  (foreign-lambda void "hpgResizeCameras" int int))
 
 (define move-camera!
   (foreign-lambda void "hpgMoveCamera" c-pointer float float float))
@@ -157,6 +166,30 @@
 
 (define camera-look-at!
   (foreign-lambda void "hpgCameraLookAt" c-pointer float float float))
+
+(define pan-camera!
+  (foreign-lambda void "hpgPanCamera" c-pointer float))
+
+(define set-camera-pan!
+  (foreign-lambda void "hpgSetCameraPan" c-pointer float))
+
+(define tilt-camera!
+  (foreign-lambda void "hpgTiltCamera" c-pointer float))
+
+(define set-camera-tilt!
+  (foreign-lambda void "hpgSetCameraTilt" c-pointer float))
+
+(define zoom-camera!
+  (foreign-lambda void "hpgZoomCamera" c-pointer float))
+
+(define set-camera-zoom!
+  (foreign-lambda void "hpgSetCameraZoom" c-pointer float))
+
+(define roll-camera!
+  (foreign-lambda void "hpgRollCamera" c-pointer float))
+
+(define set-camera-roll!
+  (foreign-lambda void "hpgSetCameraRoll" c-pointer float))
 
 (define current-camera-position
   (foreign-lambda c-pointer "hpgCurrentCameraPosition"))
