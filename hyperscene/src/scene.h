@@ -3,11 +3,6 @@
 #include "memory.h"
 #include "partition.h"
 
-typedef enum {
-    POSITION, LOOK_AT, ORBIT
-} CameraStyle;
-
-
 struct pipeline {
     bool hasAlpha;
     void (*preRender)(void *);
@@ -20,7 +15,8 @@ struct node {
     Node partitionData;
     HPGscene *scene;
     HPGvector children;
-    float x, y, z, rx, ry, rz, angle;
+    HPMpoint position;
+    HPMquat rotation;
     float *transform;
     struct pipeline *pipeline;
     void (*delete)(void *); //(data)
@@ -36,16 +32,12 @@ struct scene {
     HPGpool nodePool, boundingSpherePool, transformPool, partitionPool;
 };
 
-typedef struct {
-    float x, y, z;
-} Point;
-
 struct camera {
     HPGscene *scene;
-    CameraStyle style;
-    Point position, up, object;
-    float angle, tilt, roll, distance;
+    HPGcameraStyle style;
+    HPMpoint position, up, object;
     float n, f, viewAngle;
+    HPMquat rotation; // pan, tilt, roll, distance for ORBIT camera
     float projection[16];
     float viewProjection[16];
     float modelViewProjection[16];
