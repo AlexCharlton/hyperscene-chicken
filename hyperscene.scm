@@ -3,6 +3,8 @@
    make-scene
    activate-scene
    deactivate-scene
+   update-scene
+   update-scenes
    add-pipeline
    delete-pipeline
    set-pipeline-alpha
@@ -12,9 +14,7 @@
    set-bounding-sphere!
    move-node!
    set-node-position!
-   rotate-node!
-   set-node-rotation!
-   node-model-matrix
+   node-rotation
    node-data
 
    make-camera
@@ -25,8 +25,8 @@
    set-camera-view-angle!
    move-camera!
    set-camera-position!
-   rotate-camera!
-   set-camera-rotation!
+   camera-rotation
+   set-camera-up!
    camera-look-at!
    pan-camera!
    set-camera-pan!
@@ -44,8 +44,7 @@
 (import chicken scheme foreign)
 (use miscmacros lolevel)
 
-#>#include <hyperscene.h>
-<#
+(foreign-declare "#include <hyperscene.h>")
 
 (define *window-size-fun* (lambda () (values 0 0)))
 
@@ -87,6 +86,11 @@
 (define activate-scene
   (foreign-lambda void "hpgActiveateScene" c-pointer))
 
+(define update-scene
+  (foreign-lambda void "hpgUpdateScene" c-pointer))
+
+(define update-scenes
+  (foreign-lambda void "hpgUpdateScenes"))
 
 ;;; Nodes
 (define add-node
@@ -99,19 +103,13 @@
   (foreign-lambda void "hpgSetBoundingSphere" c-pointer float))
 
 (define move-node!
-  (foreign-lambda void "hpgMoveNode" c-pointer float float float))
+  (foreign-lambda void "hpgMoveNode" c-pointer f32vector))
 
 (define set-node-position!
-  (foreign-lambda void "hpgSetNodePosition" c-pointer float float float))
+  (foreign-lambda void "hpgSetNodePosition" c-pointer f32vector))
 
-(define rotate-node!
-  (foreign-lambda void "hpgRotateNode" c-pointer float))
-
-(define set-node-rotation!
-  (foreign-lambda void "hpgSetNodeRotation" c-pointer float float float float))
-
-(define node-model-matrix
-  (foreign-lambda c-pointer "hpgNodeTransform" c-pointer))
+(define node-rotation
+  (foreign-lambda c-pointer "hpgNodeRotation" c-pointer))
 
 (define node-data
   (foreign-lambda c-pointer "hpgNodeData" c-pointer))
@@ -121,13 +119,21 @@
 (define +ortho+ 0)
 (define +perspective+ 1)
 
-(define (make-camera type scene #!key (near 0.1) (far 100) (angle 70))
+(define +position+ 0)
+(define +look-at+ 1)
+(define +orbit+ 1)
+
+(define (make-camera type style scene #!key (near 0.1) (far 100) (angle 70))
   (let ((camera (set-finalizer!
                  ((foreign-safe-lambda c-pointer "hpgMakeCamera"
-                    unsigned-int c-pointer)
+                    unsigned-int unsigned-int c-pointer)
                   (ecase type
                     ((ortho:) +ortho+)
                     ((perspective:) +perspective+))
+                  (ecase style
+                    ((position:) +position+)
+                    ((look-at:) +look-at+)
+                    ((orbit:) +orbit+))
                   scene)
                  delete-camera)))
     (set-camera-clip-planes! camera near far)
@@ -144,28 +150,32 @@
   (foreign-safe-lambda void "hpgSetCameraViewAngle" c-pointer float))
 
 (define render-cameras
-  (foreign-lambda void "hpgRenderCameras"))
+  (cond-expand
+    (debug (foreign-safe-lambda void "hpgRenderCameras"))
+    (else (foreign-lambda void "hpgRenderCameras"))))
 
 (define render-camera
-  (foreign-lambda void "hpgRenderCamera" c-pointer))
+  (cond-expand
+    (debug (foreign-safe-lambda void "hpgRenderCamera" c-pointer))
+    (else (foreign-lambda void "hpgRenderCamera" c-pointer))))
 
 (define resize-cameras
   (foreign-lambda void "hpgResizeCameras" int int))
 
 (define move-camera!
-  (foreign-lambda void "hpgMoveCamera" c-pointer float float float))
+  (foreign-lambda void "hpgMoveCamera" c-pointer f32vector))
 
 (define set-camera-position!
-  (foreign-lambda void "hpgSetCameraPosition" c-pointer float float float))
+  (foreign-lambda void "hpgSetCameraPosition" c-pointer f32vector))
 
-(define rotate-camera!
-  (foreign-lambda void "hpgRotateCamera" c-pointer float ))
+(define camera-rotation
+  (foreign-lambda c-pointer "hpgCameraRotation" c-pointer))
 
-(define set-camera-rotation!
-  (foreign-lambda void "hpgSetCameraRotation" c-pointer float float float float))
+(define set-camera-up!
+  (foreign-lambda void "hpgSetCameraUp" c-pointer f32vector))
 
 (define camera-look-at!
-  (foreign-lambda void "hpgCameraLookAt" c-pointer float float float))
+  (foreign-lambda void "hpgCameraLookAt" c-pointer f32vector))
 
 (define pan-camera!
   (foreign-lambda void "hpgPanCamera" c-pointer float))
