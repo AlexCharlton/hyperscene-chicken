@@ -1,6 +1,6 @@
 ;; hyperscene.setup -*- scheme -*-
 
-(define compile-options "-d2 -O2")
+(define compile-options "-d2 -O2 -Ddebug")
 
 (compile ,compile-options -I./hyperscene/include/ -I./hyperscene/hypermath/include/ -J -s hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
 (compile ,compile-options -s hyperscene.import.scm)
