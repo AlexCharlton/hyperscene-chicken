@@ -37,8 +37,9 @@
    roll-camera!
    set-camera-roll!
    current-camera-position
+   current-camera-view
    current-camera-projection
-   current-camera-model-view
+   current-camera-view-projection
    current-camera-model-view-projection)
 
 (import chicken scheme foreign)
@@ -97,7 +98,7 @@
   (foreign-lambda c-pointer "hpgAddNode" c-pointer c-pointer c-pointer c-pointer))
 
 (define delete-node
-  (foreign-lambda void "hpgDeleteNode" c-pointer))
+  (foreign-safe-lambda void "hpgDeleteNode" c-pointer))
 
 (define set-bounding-sphere!
   (foreign-lambda void "hpgSetBoundingSphere" c-pointer float))
@@ -121,7 +122,7 @@
 
 (define +position+ 0)
 (define +look-at+ 1)
-(define +orbit+ 1)
+(define +orbit+ 2)
 
 (define (make-camera type style scene #!key (near 0.1) (far 100) (angle 70))
   (let ((camera (set-finalizer!
@@ -204,11 +205,14 @@
 (define current-camera-position
   (foreign-lambda c-pointer "hpgCurrentCameraPosition"))
 
+(define current-camera-view
+  (foreign-lambda c-pointer "hpgCurrentCameraView"))
+
 (define current-camera-projection
   (foreign-lambda c-pointer "hpgCurrentCameraProjection"))
 
-(define current-camera-model-view
-  (foreign-lambda c-pointer "hpgCurrentCameraModelView"))
+(define current-camera-view-projection
+  (foreign-lambda c-pointer "hpgCurrentCameraViewProjection"))
 
 (define current-camera-model-view-projection
   (foreign-lambda c-pointer "hpgCurrentCameraModelViewProjection"))
