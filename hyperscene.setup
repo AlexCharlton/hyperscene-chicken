@@ -1,8 +1,15 @@
 ;; hyperscene.setup -*- scheme -*-
 
-(define compile-options "-d2 -O2 -Ddebug")
+(define compile-options "-O3 -C '-O3'")
 
-(compile ,compile-options -I./hyperscene/include/ -I./hyperscene/hypermath/include/ -J -s hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
+(define debug
+  (cond-expand
+    (debug "-d2 -C '-DDEBUG -g'")
+    (else "-d0")))
+
+(compile ,compile-options ,debug -J -s
+         -I./hyperscene/include/ -I./hyperscene/hypermath/include/
+         hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
 (compile ,compile-options -s hyperscene.import.scm)
 
 (install-extension
