@@ -15,11 +15,14 @@
    move-node!
    set-node-position!
    node-rotation
+   node-position
    node-data
 
    make-camera
    render-cameras
    render-camera
+   safe-render-cameras
+   safe-render-camera
    resize-cameras
    set-camera-clip-planes!
    set-camera-view-angle!
@@ -36,6 +39,9 @@
    set-camera-zoom!
    roll-camera!
    set-camera-roll!
+   move-camera-forward!
+   move-camera-up!
+   strafe-camera!
    current-camera-position
    current-camera-view
    current-camera-projection
@@ -43,7 +49,7 @@
    current-camera-model-view-projection)
 
 (import chicken scheme foreign)
-(use miscmacros lolevel)
+(use srfi-4 miscmacros lolevel)
 
 (foreign-declare "#include <hyperscene.h>")
 
@@ -112,6 +118,18 @@
 (define node-rotation
   (foreign-lambda c-pointer "hpgNodeRotation" c-pointer))
 
+(define node-position*
+  (foreign-lambda c-pointer "hpgNodePosition" c-pointer))
+
+(define (node-position node)
+  (let ((pos (make-f32vector 3))
+        (pos* (node-position* node)))
+    (print pos*)
+    (f32vector-set! pos 0 (pointer-f32-ref pos*))
+    (f32vector-set! pos 1 (pointer-f32-ref (pointer+ pos* 4)))
+    (f32vector-set! pos 2 (pointer-f32-ref (pointer+ pos* 8)))
+    pos))
+
 (define node-data
   (foreign-lambda c-pointer "hpgNodeData" c-pointer))
 
@@ -123,6 +141,7 @@
 (define +position+ 0)
 (define +look-at+ 1)
 (define +orbit+ 2)
+(define +first-person+ 3)
 
 (define (make-camera type style scene #!key (near 0.1) (far 100) (angle 70))
   (let ((camera (set-finalizer!
@@ -134,7 +153,8 @@
                   (ecase style
                     ((position:) +position+)
                     ((look-at:) +look-at+)
-                    ((orbit:) +orbit+))
+                    ((orbit:) +orbit+)
+                    ((first-person:) +first-person+))
                   scene)
                  delete-camera)))
     (set-camera-clip-planes! camera near far)
@@ -151,14 +171,16 @@
   (foreign-safe-lambda void "hpgSetCameraViewAngle" c-pointer float))
 
 (define render-cameras
-  (cond-expand
-    (debug (foreign-safe-lambda void "hpgRenderCameras"))
-    (else (foreign-lambda void "hpgRenderCameras"))))
+  (foreign-lambda void "hpgRenderCameras"))
+
+(define safe-render-cameras
+  (foreign-safe-lambda void "hpgRenderCameras"))
 
 (define render-camera
-  (cond-expand
-    (debug (foreign-safe-lambda void "hpgRenderCamera" c-pointer))
-    (else (foreign-lambda void "hpgRenderCamera" c-pointer))))
+  (foreign-lambda void "hpgRenderCamera" c-pointer))
+
+(define safe-render-camera
+  (foreign-safe-lambda void "hpgRenderCamera" c-pointer))
 
 (define resize-cameras
   (foreign-lambda void "hpgResizeCameras" int int))
@@ -201,6 +223,15 @@
 
 (define set-camera-roll!
   (foreign-lambda void "hpgSetCameraRoll" c-pointer float))
+
+(define move-camera-forward!
+  (foreign-lambda void "hpgMoveCameraForward" c-pointer float))
+
+(define move-camera-up!
+  (foreign-lambda void "hpgMoveCameraUp" c-pointer float))
+
+(define strafe-camera!
+  (foreign-lambda void "hpgStrafeCamera" c-pointer float))
 
 (define current-camera-position
   (foreign-lambda c-pointer "hpgCurrentCameraPosition"))
