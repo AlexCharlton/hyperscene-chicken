@@ -2,12 +2,17 @@
 
 (define compile-options "-O3 -C '-O3'")
 
+(define reverse-painter?
+  (cond-expand
+    (no-reverse-painter "-C '-DNO_REVERSE_PAINTER'")
+    (else "")))
+
 (define debug
   (cond-expand
     (debug "-d2 -C '-DDEBUG -g'")
     (else "-d0")))
 
-(compile ,compile-options ,debug -J -s
+(compile ,compile-options ,debug ,reverse-painter? -J -s
          -I./hyperscene/include/ -I./hyperscene/hypermath/include/
          hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
 (compile ,compile-options -s hyperscene.import.scm)
