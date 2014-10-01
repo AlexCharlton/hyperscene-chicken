@@ -9,7 +9,7 @@ typedef enum {
 } HPGcameraType;
 
 typedef enum {
-    POSITION, LOOK_AT, ORBIT
+    POSITION, LOOK_AT, ORBIT, FIRST_PERSON
 } HPGcameraStyle;
 
 
@@ -38,6 +38,8 @@ void hpgMoveNode(HPGnode *node, float *vec);
 void hpgSetNodePosition(HPGnode *node, float *p);
 
 float* hpgNodeRotation(HPGnode *node);
+
+float* hpgNodePosition(HPGnode *node);
 
 float* hpgNodeData(HPGnode *node);
 
@@ -108,6 +110,12 @@ void hpgSetCameraZoom(HPGcamera *camera, float distance);
 void hpgRollCamera(HPGcamera *camera, float angle);
 
 void hpgSetCameraRoll(HPGcamera *camera, float angle);
+
+void hpgMoveCameraForward(HPGcamera *camera, float dist);
+
+void hpgMoveCameraUp(HPGcamera *camera, float dist);
+
+void hpgStrafeCamera(HPGcamera *camera, float dist);
 
 void hpgResizeCameras(int width, int height);
 
