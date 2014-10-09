@@ -3,8 +3,10 @@
 #include "memory.h"
 #include "partition.h"
 
+typedef void (*cameraUpdateFun)(int, int, HPScamera*);
+
 struct pipeline {
-    bool hasAlpha;
+    long isAlpha; // A boolean value expressed as a long so that pipeline can't be mixed up with an extension
     void (*preRender)(void *);
     void (*render)(void *);
     void (*postRender)();
@@ -13,8 +15,8 @@ struct pipeline {
 struct node {
     struct node *parent;
     Node partitionData;
-    HPGscene *scene;
-    HPGvector children;
+    HPSscene *scene;
+    HPSvector children;
     HPMpoint position;
     HPMquat rotation;
     float *transform;
@@ -26,25 +28,33 @@ struct node {
 
 struct scene {
     void *null; // used to distinguish top-level nodes;
-    HPGvector topLevelNodes;
+    HPSvector topLevelNodes;
     PartitionInterface *partitionInterface;
     void *partitionStruct;
-    HPGpool nodePool, boundingSpherePool, transformPool, partitionPool;
+    HPSpool nodePool, boundingSpherePool, transformPool, partitionPool;
+    HPSvector extensions;
 };
 
 struct camera {
-    HPGscene *scene;
-    HPGcameraStyle style;
+    HPSscene *scene;
+    HPScameraStyle style;
     HPMpoint position, up, object;
     float n, f, viewAngle;
-    HPMquat rotation; // pan, tilt, roll, distance for ORBIT camera
+    HPMquat rotation; // yaw, pitch, roll, distance for ORBIT camera
     float view[16];
     float projection[16];
     float viewProjection[16];
     float modelViewProjection[16];
     Plane planes[6];
-    HPGcameraUpdateFun update;
+    cameraUpdateFun update;
 };
 
-void hpgInitCameras();
-void hpgSetWindowSizeFun(HPGwindowSizeFun fun);
+void hpsInitCameras();
+void hpsSetWindowSizeFun(HPSwindowSizeFun fun);
+
+/* Extensions */
+void hpsPreRenderExtensions(HPSscene *scene);
+void hpsPostRenderExtensions(HPSscene *scene);
+void hpsVisibleNodeExtensions(HPSscene *scene, HPSnode *node);
+void hpsUpdateNodeExtensions(HPSscene *scene, HPSnode *node);
+void hpsDeleteExtensions(HPSscene *scene);
