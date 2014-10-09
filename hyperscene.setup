@@ -7,12 +7,17 @@
     (no-reverse-painter "-C '-DNO_REVERSE_PAINTER'")
     (else "")))
 
+(define inverse-transpose?
+  (cond-expand
+    (no-inverse-transpose "-C '-DNO_INVERSE_TRANSPOSE'")
+    (else "")))
+
 (define debug
   (cond-expand
     (debug "-d2 -C '-DDEBUG -g'")
     (else "-d0")))
 
-(compile ,compile-options ,debug ,reverse-painter? -J -s
+(compile ,compile-options ,debug ,reverse-painter? ,inverse-transpose? -J -s
          -I./hyperscene/include/ -I./hyperscene/hypermath/include/
          hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
 (compile ,compile-options -s hyperscene.import.scm)
