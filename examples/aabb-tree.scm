@@ -1,3 +1,16 @@
+;;;; aabb-tree.scm
+;;;;
+;;;; A program made to test out the partition interface.
+;;;;
+;;;; Compile with csc -lGL aabb-tree.scm
+;;;;
+;;;; Add nodes with `a`, delete them with `d`.
+;;;; Toggle the number of nodes that are being added and deleted, between 1 and 10,  with `n`.
+;;;; Toggle the axes that the nodes are being added to with `x`, `y`, and `z` (x axis on when the program starts)
+;;;; Move the camera back and forward, left and right with the arrows
+;;;; Move the camera up and down with shift/up and down arrows
+;;;; Rotate the camera left and right with shift/left and right arrows
+
 (module aabb-tree-test ()
 (import chicken scheme)
 (use glls-render (prefix glfw3 glfw:) (prefix opengl-glew gl:) gl-math gl-utils

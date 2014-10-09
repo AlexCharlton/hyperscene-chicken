@@ -1,3 +1,14 @@
+;;;; solar-system.scm
+;;;;
+;;;; Create bad looking, but dynamically lit "solar systems"
+;;;;
+;;;; Compile with csc -lGL solar-system.scm
+;;;;
+;;;; Add a new system with `a`, delete them with `d`.
+;;;; Move the camera back and forward, left and right with the arrows
+;;;; Move the camera up and down with shift/up and down arrows
+;;;; Rotate the camera left and right with shift/left and right arrows
+
 (module solar-system ()
 (import chicken scheme)
 (use glls-render (prefix glfw3 glfw:) (prefix opengl-glew gl:) gl-math gl-utils
@@ -248,6 +259,7 @@
          (light (add-light (scene) color 1000 (make-point 0 0 0) 0)))
     (set-node-position! node (make-point x 0 z))
     (set-node-position! light (make-point x 0 z))
+    (set-node-bounding-sphere! light 20)
     (systems (cons (make-body node #f #f (satelites node 2)
                               0 light)
                    (systems)))))
