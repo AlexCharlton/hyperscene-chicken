@@ -1,129 +1,157 @@
 #include <stdbool.h>
 
-#define HPG_DEFAULT_NEAR_PLANE 1.0
-#define HPG_DEFAULT_FAR_PLANE 10000.0
-#define HPG_DEFAULT_VIEW_ANGLE 70.0
+#define HPS_DEFAULT_NEAR_PLANE 1.0
+#define HPS_DEFAULT_FAR_PLANE 10000.0
+#define HPS_DEFAULT_VIEW_ANGLE 70.0
 
 typedef enum {
-    HPG_ORTHO, HPG_PERSPECTIVE
-} HPGcameraType;
+    HPS_ORTHO, HPS_PERSPECTIVE
+} HPScameraType;
 
 typedef enum {
     POSITION, LOOK_AT, ORBIT, FIRST_PERSON
-} HPGcameraStyle;
+} HPScameraStyle;
 
 
-typedef struct node HPGnode;
-typedef struct scene HPGscene;
-typedef struct camera HPGcamera;
-typedef struct pipeline HPGpipeline;
-typedef void (*HPGwindowSizeFun)(int *, int *);
-typedef void (*HPGcameraUpdateFun)(int, int, HPGcamera*);
+typedef struct node HPSnode;
+typedef struct scene HPSscene;
+typedef struct camera HPScamera;
+typedef struct pipeline HPSpipeline;
+typedef struct partitionInterface HPSpartitionInterface;
+typedef void (*HPSwindowSizeFun)(int *, int *);
 
-extern unsigned int hpgNodePoolSize, hpgBoundingSpherePoolSize, hpgTransformPoolSize,
-    hpgPartitionPoolSize;
+typedef struct HPSextension {
+    void (*init)(void **);
+    void (*preRender)(void *);
+    void (*postRender)(void *);
+    void (*visibleNode)(void *, HPSnode *node);
+    void (*updateNode)(void *, HPSnode *node);
+    void (*delete)(void *);
+} HPSextension;
 
-void hpgInitScenes(HPGwindowSizeFun windowSizeFun);
+extern unsigned int hpsNodePoolSize;
 
-HPGnode *hpgAddNode(HPGnode *parent, void *data,
-                    HPGpipeline *pipeline,
+extern HPSpartitionInterface *hpsPartitionInterface;
+
+void hpsInit(HPSwindowSizeFun windowSizeFun);
+
+HPSscene *hpsGetScene(HPSnode *node);
+
+HPSnode *hpsAddNode(HPSnode *parent, void *data,
+                    HPSpipeline *pipeline,
                     void (*deleteFunc)(void *));
 
-void hpgDeleteNode(HPGnode *node);
+void hpsDeleteNode(HPSnode *node);
 
-void hpgSetBoundingSphere(HPGnode *node, float radius);
+void hpsSetNodeBoundingSphere(HPSnode *node, float radius);
 
-void hpgMoveNode(HPGnode *node, float *vec);
+float *hpsNodeBoundingSphere(HPSnode *node);
 
-void hpgSetNodePosition(HPGnode *node, float *p);
+void hpsMoveNode(HPSnode *node, float *vec);
 
-float* hpgNodeRotation(HPGnode *node);
+void hpsSetNodePosition(HPSnode *node, float *p);
 
-float* hpgNodePosition(HPGnode *node);
+void hpsNodeNeedsUpdate(HPSnode *node);
 
-float* hpgNodeData(HPGnode *node);
+float* hpsNodeRotation(HPSnode *node);
 
-HPGscene *hpgMakeScene(void *partitionInterface);
+float* hpsNodePosition(HPSnode *node);
 
-void hpgDeleteScene(HPGscene *scene);
+float* hpsNodeTransform(HPSnode *node);
 
-void hpgActiveateScene(HPGscene *s);
+void* hpsNodeData(HPSnode *node);
 
-void hpgDeactiveateScene(HPGscene *s);
+HPSscene *hpsMakeScene();
 
-void hpgUpdateScenes();
+void hpsDeleteScene(HPSscene *scene);
+
+void hpsActivateScene(HPSscene *s);
+
+void hpsDeactivateScene(HPSscene *s);
+
+void hpsUpdateScenes();
 
 /* Pipelines */
-HPGpipeline *hpgAddPipeline(void (*preRender)(void *),
+HPSpipeline *hpsAddPipeline(void (*preRender)(void *),
 			    void (*render)(void *),
 			    void (*postRender)(),
                             bool hasAlpha);
 
-void hpgPipelineAlpha(HPGpipeline *pipeline, bool hasAlpha);
-
-void hpgDeletePipeline(HPGpipeline *pipeline);
+void hpsDeletePipeline(HPSpipeline *pipeline);
 
 /* Cameras */
 
-float *hpgCurrentCameraPosition();
+float *hpsCurrentInverseTransposeModel;
 
-float *hpgCurrentCameraView();
+float *hpsCurrentCameraPosition;
 
-float *hpgCurrentCameraProjection();
+float *hpsCurrentCameraView;
 
-float *hpgCurrentCameraViewProjection();
+float *hpsCurrentCameraProjection;
 
-float *hpgCurrentCameraModelViewProjection();
+float *hpsCurrentCameraViewProjection;
 
-void hpgRenderCamera(HPGcamera *camera);
+float *hpsCurrentCameraModelViewProjection;
 
-HPGcamera *hpgMakeCamera(HPGcameraType type, HPGcameraStyle style, HPGscene *scene);
+void hpsRenderCamera(HPScamera *camera);
 
-void hpgSetCameraClipPlanes(HPGcamera *camera, float near, float far);
+HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene);
 
-void hpgSetCameraViewAngle(HPGcamera *camera, float angle);
+void hpsSetCameraClipPlanes(HPScamera *camera, float near, float far);
 
-void hpgDeleteCamera(HPGcamera *camera);
+void hpsSetCameraViewAngle(HPScamera *camera, float angle);
 
-void hpgMoveCamera(HPGcamera *camera, float *vec);
+void hpsDeleteCamera(HPScamera *camera);
 
-void hpgSetCameraPosition(HPGcamera *camera, float *vec);
+void hpsMoveCamera(HPScamera *camera, float *vec);
 
-float *hpgCameraRotation(HPGcamera *camera);
+void hpsSetCameraPosition(HPScamera *camera, float *vec);
 
-void hpgSetCameraUp(HPGcamera *camera, float *up);
+float *hpsCameraPosition(HPScamera *camera);
 
-void hpgCameraLookAt(HPGcamera *camera, float *p);
+float *hpsCameraRotation(HPScamera *camera);
 
-void hpgPanCamera(HPGcamera *camera, float angle);
+void hpsSetCameraUp(HPScamera *camera, float *up);
 
-void hpgSetCameraPan(HPGcamera *camera, float angle);
+void hpsCameraLookAt(HPScamera *camera, float *p);
 
-void hpgTiltCamera(HPGcamera *camera, float angle);
+void hpsYawCamera(HPScamera *camera, float angle);
 
-void hpgSetCameraTilt(HPGcamera *camera, float angle);
+void hpsSetCameraYaw(HPScamera *camera, float angle);
 
-void hpgZoomCamera(HPGcamera *camera, float distance);
+void hpsPitchCamera(HPScamera *camera, float angle);
 
-void hpgSetCameraZoom(HPGcamera *camera, float distance);
+void hpsSetCameraPitch(HPScamera *camera, float angle);
 
-void hpgRollCamera(HPGcamera *camera, float angle);
+void hpsZoomCamera(HPScamera *camera, float distance);
 
-void hpgSetCameraRoll(HPGcamera *camera, float angle);
+void hpsSetCameraZoom(HPScamera *camera, float distance);
 
-void hpgMoveCameraForward(HPGcamera *camera, float dist);
+void hpsRollCamera(HPScamera *camera, float angle);
 
-void hpgMoveCameraUp(HPGcamera *camera, float dist);
+void hpsSetCameraRoll(HPScamera *camera, float angle);
 
-void hpgStrafeCamera(HPGcamera *camera, float dist);
+void hpsMoveCameraForward(HPScamera *camera, float dist);
 
-void hpgResizeCameras(int width, int height);
+void hpsMoveCameraUp(HPScamera *camera, float dist);
 
-void hpgRenderCameras();
+void hpsStrafeCamera(HPScamera *camera, float dist);
 
-void hpgActiveateCamera(HPGcamera *c);
+void hpsResizeCameras();
 
-void hpgDeactiveateCamera(HPGcamera *c);
+void hpsRenderCameras();
+
+void hpsActivateCamera(HPScamera *c);
+
+void hpsDeactivateCamera(HPScamera *c);
 
 /* Spatial partitioning interfaces */
-void *hpgAABBpartitionInterface();
+extern void *hpsAABBpartitionInterface;
+
+extern unsigned int hpsAABBpartitionPoolSize;
+
+/* Extensions */
+void hpsActivateExtension(HPSscene *scene, HPSextension *extension);
+
+void *hpsExtensionData(HPSscene *scene, HPSextension *extension);
+
