@@ -201,7 +201,7 @@
 (define +orbit+ 2)
 (define +first-person+ 3)
 
-(define (make-camera type style scene #!key (near 0.1) (far 100) (angle 70))
+(define (make-camera type style scene #!key (near 1) (far 10000) (angle 70))
   (let ((camera (set-finalizer!
                  ((foreign-safe-lambda c-pointer "hpsMakeCamera"
                     unsigned-int unsigned-int c-pointer)
