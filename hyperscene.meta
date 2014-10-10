@@ -4,6 +4,4 @@
  (author "Alex Charlton")
  (category graphics)
  (license "BSD")
- (depends miscmacros)
- (test-depends test)
- (foreign-depends))
+ (depends miscmacros))
