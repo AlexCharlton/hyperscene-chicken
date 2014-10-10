@@ -3,7 +3,6 @@
    make-scene
    activate-scene
    deactivate-scene
-   update-scene
    update-scenes
    add-pipeline
    delete-pipeline
@@ -13,6 +12,7 @@
 
    add-node
    delete-node
+   unsafe-delete-node
    node-scene
    set-node-bounding-sphere!
    node-bounding-sphere
@@ -27,8 +27,10 @@
    make-camera
    render-cameras
    render-camera
-   safe-render-cameras
-   safe-render-camera
+   unsafe-render-cameras
+   unsafe-render-camera
+   activate-camera
+   deactivate-camera
    resize-cameras
    set-camera-clip-planes!
    set-camera-view-angle!
@@ -98,9 +100,10 @@
   (set! *window-size-fun* fun)
   ((foreign-lambda void "hpsInit" c-pointer) #$windowSizeFun))
 
-(define add-pipeline
-  (foreign-lambda c-pointer "hpsAddPipeline"
-    c-pointer c-pointer c-pointer bool))
+(define (add-pipeline pre-render render post-render #!optional (alpha? #f))
+  ((foreign-lambda c-pointer "hpsAddPipeline"
+     c-pointer c-pointer c-pointer bool)
+   pre-render render post-render alpha?))
 
 (define delete-pipeline
   (foreign-lambda void "hpsDeletePipeline" c-pointer))
@@ -130,9 +133,6 @@
 (define activate-scene
   (foreign-lambda void "hpsActivateScene" c-pointer))
 
-(define update-scene
-  (foreign-lambda void "hpsUpdateScene" c-pointer))
-
 (define update-scenes
   (foreign-lambda void "hpsUpdateScenes"))
 
@@ -153,6 +153,9 @@
 (define add-node
   (foreign-lambda c-pointer "hpsAddNode" c-pointer c-pointer c-pointer c-pointer))
 
+(define unsafe-delete-node
+  (foreign-lambda void "hpsDeleteNode" c-pointer))
+
 (define delete-node
   (foreign-safe-lambda void "hpsDeleteNode" c-pointer))
 
@@ -162,8 +165,14 @@
 (define set-node-bounding-sphere!
   (foreign-lambda void "hpsSetNodeBoundingSphere" c-pointer float))
 
-(define node-bounding-sphere
-  (foreign-lambda c-pointer "hpsNodeBoundingSphere" c-pointer))
+(define (node-bounding-sphere node)
+  (let ((bs (make-f32vector 4))
+        (bs* ((foreign-lambda c-pointer "hpsNodeBoundingSphere" c-pointer) node)))
+    (f32vector-set! bs 0 (pointer-f32-ref bs*))
+    (f32vector-set! bs 1 (pointer-f32-ref (pointer+ bs* 4)))
+    (f32vector-set! bs 2 (pointer-f32-ref (pointer+ bs* 8)))
+    (f32vector-set! bs 3 (pointer-f32-ref (pointer+ bs* 12)))
+    bs))
 
 (define move-node!
   (foreign-lambda void "hpsMoveNode" c-pointer f32vector))
@@ -222,22 +231,28 @@
 (define delete-camera
   (foreign-lambda void "hpsDeleteCamera" c-pointer))
 
+(define deactivate-camera
+  (foreign-lambda void "hpsDeactivateCamera" c-pointer))
+
+(define activate-camera
+  (foreign-lambda void "hpsActivateCamera" c-pointer))
+
 (define set-camera-clip-planes!
   (foreign-safe-lambda void "hpsSetCameraClipPlanes" c-pointer float float))
 
 (define set-camera-view-angle!
   (foreign-safe-lambda void "hpsSetCameraViewAngle" c-pointer float))
 
-(define render-cameras
+(define unsafe-render-cameras
   (foreign-lambda void "hpsRenderCameras"))
 
-(define safe-render-cameras
+(define render-cameras
   (foreign-safe-lambda void "hpsRenderCameras"))
 
-(define render-camera
+(define unsafe-render-camera
   (foreign-lambda void "hpsRenderCamera" c-pointer))
 
-(define safe-render-camera
+(define render-camera
   (foreign-safe-lambda void "hpsRenderCamera" c-pointer))
 
 (define resize-cameras
