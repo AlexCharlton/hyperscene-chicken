@@ -388,6 +388,18 @@ A pointer to the array of intensities of the visible lights in the scene current
 
 A pointer to the array of packed `(x y z spotAngle)` directions and angles of the visible lights in the scene currently being rendered.
 
+    [procedure] (make-material R G B SHININESS)
+
+Make a simple material definition consisting of an RGB color (specular color, perhaps) and shininess value. Returns a four element f32vector, located in non-garbage-collected memory. Intended for use as a uniform value.
+
+    [procedure] (set-material-specular-color! MATERIAL R G B)
+
+Set the RGB values of the given material.
+
+    [procedure] (set-material-shininess! MATERIAL SHININESS)
+
+Set the shininess value of the given material.
+
     [procedure] (set-light-pool-size! SIZE)
 
 Every scene is given a pool from which to allocate lights, the size of which (at initialization) can be modified by calling this function (defaults to `1024`).
