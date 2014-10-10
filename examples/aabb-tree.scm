@@ -1,6 +1,6 @@
 ;;;; aabb-tree.scm
 ;;;;
-;;;; A program made to test out the partition interface.
+;;;; A program made to test out the partition interface. Try compiling hyperscene with -D debug to see the aabb-tree debugging information.
 ;;;;
 ;;;; Compile with csc -lGL aabb-tree.scm
 ;;;;
@@ -12,11 +12,10 @@
 ;;;; Rotate the camera left and right with shift/left and right arrows
 
 (module aabb-tree-test ()
+
 (import chicken scheme)
 (use glls-render (prefix glfw3 glfw:) (prefix opengl-glew gl:) gl-math gl-utils
-     noise hyperscene miscmacros lolevel extras srfi-1)
-
-(init (lambda () (glfw:get-window-size (glfw:window))))
+     hyperscene srfi-1 extras miscmacros lolevel)
 
 (define cube (make-mesh vertices: '(attributes: ((position #:float 3))
                                     initial-elements: ((position . (0 0 0
@@ -137,7 +136,7 @@
   (move-camera-forward! (camera) (* speed (forward)))
   (strafe-camera! (camera) (* speed (right)))
   (move-camera-up! (camera) (* speed (up)))
-  (pan-camera! (camera) (* 0.05 (rotate)))
+  (yaw-camera! (camera) (* 0.05 (rotate)))
   (update-scenes))
 
 (define axes (make-parameter '(x)))
@@ -180,14 +179,15 @@
     (delete-cube)))
 
 ;;; Initialization and main loop
+(init (lambda () (glfw:get-window-size (glfw:window))))
+
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
   (gl:enable gl:+depth-test+)
   (gl:depth-func gl:+less+)
   (compile-pipelines)
   (scene (make-scene))
-  (camera (make-camera #:perspective #:first-person (scene) near: 0.001 far: 10000
-                       angle: 45))
+  (camera (make-camera #:perspective #:first-person (scene)))
   (set-camera-position! (camera) (make-point 0 0 60))
   (let loop ()
     (glfw:swap-buffers (glfw:window))

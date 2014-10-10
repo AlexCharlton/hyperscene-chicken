@@ -10,11 +10,10 @@
 ;;;; Rotate the camera left and right with shift/left and right arrows
 
 (module solar-system ()
+
 (import chicken scheme)
 (use glls-render (prefix glfw3 glfw:) (prefix opengl-glew gl:) gl-math gl-utils
-     noise hyperscene miscmacros lolevel extras srfi-1)
-
-(init (lambda () (glfw:get-window-size (glfw:window))))
+     hyperscene miscmacros lolevel extras srfi-1)
 
 (define cube (make-mesh vertices: '(attributes: ((position #:float 3)
                                                  (normal #:float 3))
@@ -27,13 +26,13 @@
                                                                     1 1 1
                                                                     -1 1 1))
                                                        (normal . (-1 -1 -1
-                                                                    1 -1 -1
-                                                                    1 1 -1
-                                                                    -1 1 -1
-                                                                    -1 -1 1
-                                                                    1 -1 1
-                                                                    1 1 1
-                                                                    -1 1 1))))
+                                                                  1 -1 -1
+                                                                  1 1 -1
+                                                                  -1 1 -1
+                                                                  -1 -1 1
+                                                                  1 -1 1
+                                                                  1 1 1
+                                                                  -1 1 1))))
                         indices: '(type: #:ushort
                                    initial-elements: (0 1 2
                                                       2 3 0
@@ -295,6 +294,8 @@
   (update-scenes))
 
 ;;; Initialization and main loop
+(init (lambda () (glfw:get-window-size (glfw:window))))
+
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
   (gl:enable gl:+depth-test+)
@@ -304,8 +305,7 @@
   (scene (make-scene))
   (activate-extension (scene) (lighting))
   (set-ambient-light! (scene) (make-point 0.001 0.001 0.001))
-  (camera (make-camera #:perspective #:first-person (scene) near: 1.0 far: 1000000
-                       angle: 45))
+  (camera (make-camera #:perspective #:first-person (scene)))
   (set-camera-position! (camera) (make-point 0 0 130))
   (let loop ()
     (glfw:swap-buffers (glfw:window))
