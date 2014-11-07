@@ -37,11 +37,11 @@ Create a new scene. The scene’s space is partitioned with the [partition inter
 
 Delete the given scene. 
 
-    [procedure] (actiave-scene SCENE)
+    [procedure] (activate-scene SCENE)
 
 Activate the given scene. If the scene is already active, this has no effect.
 
-    [procedure] (deactiave-scene SCENE)
+    [procedure] (deactivate-scene SCENE)
 
 Deactivate the given scene.
 
@@ -110,7 +110,7 @@ Return a pointer to the 4x4 transform matrix that describes the position and ori
 Return a pointer to the node’s user supplied data.
 
 #### Memory management
-    [procedure] (set-node-pool-size! N)
+    [procedure] (set-node-pool-size! SIZE)
 
 hyperscene uses memory pools to store its data relating to nodes, which makes creation and deletion of nodes and scenes quick. For best performance, set the node pool size to be as large as the greatest number of nodes that will be needed for a scene. Defaults to `4096`.
 
