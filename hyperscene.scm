@@ -362,8 +362,8 @@
 (define (current-light-directions)
   (foreign-value "hpsCurrentLightDirections" c-pointer))
 
-(define current-ambient-light
-  (foreign-lambda c-pointer "hpsAmbientLight" c-pointer))
+(define (current-ambient-light)
+  (foreign-value "hpsCurrentAmbientLight" c-pointer))
 
 (define origin (f32vector 0 0 0))
 

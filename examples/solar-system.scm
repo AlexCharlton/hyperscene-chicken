@@ -129,7 +129,7 @@
            (append args (list mvp: (current-camera-model-view-projection)
                               material: planet-material
                               camera-position: (current-camera-position)
-                              ambient: (current-ambient-light (scene))
+                              ambient: (current-ambient-light)
                               model: (node-transform node)
                               light-positions: (current-light-positions)
                               light-colors: (current-light-colors)
