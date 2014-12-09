@@ -50,7 +50,8 @@
      (set! frag-color (vec4 1)))))
 
 (define simple-pipeline
-  (let-values (((_ __ ___ begin render end) (simple-shader-fast-render-functions)))
+  (let-values (((_ __ ___ ____ begin render end _____)
+                (simple-shader-fast-render-functions)))
     (add-pipeline begin render end #f)))
 
 (define (add-node* parent . args)

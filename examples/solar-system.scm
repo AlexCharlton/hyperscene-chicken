@@ -116,7 +116,8 @@
      (set! frag-color (light (vec4 1) p n)))))
 
 (define phong-pipeline
-  (let-values (((_ __ ___ begin render end) (phong-shader-fast-render-functions)))
+  (let-values (((_ __ ___ ____ begin render end _____)
+                (phong-shader-fast-render-functions)))
     (add-pipeline begin render end #f)))
 
 (define (add-planet-node parent . args)
@@ -151,7 +152,8 @@
      (set! frag-color (vec4 color 1)))))
 
 (define sun-pipeline
-  (let-values (((_ __ ___ begin render end) (sun-shader-fast-render-functions)))
+  (let-values (((_ __ ___ ____ begin render end _____)
+                (sun-shader-fast-render-functions)))
     (add-pipeline begin render end #f)))
 
 (define (add-sun-node parent . args)
