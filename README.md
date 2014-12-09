@@ -406,6 +406,12 @@ The [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene) is extens
 See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/tree/master/examples) to see hyperscene in action.
 
 ## Version history
+### Version 0.2.0
+8 December 2014
+
+* Remove `unsafe-render-camera*` functions
+* `current-ambient-light` now takes no argument
+
 ### Version 0.1.0
 * Initial release
 
