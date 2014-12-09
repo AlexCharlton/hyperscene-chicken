@@ -27,8 +27,6 @@
    make-camera
    render-cameras
    render-camera
-   unsafe-render-cameras
-   unsafe-render-camera
    activate-camera
    deactivate-camera
    resize-cameras
@@ -243,14 +241,8 @@
 (define set-camera-view-angle!
   (foreign-safe-lambda void "hpsSetCameraViewAngle" c-pointer float))
 
-(define unsafe-render-cameras
-  (foreign-lambda void "hpsRenderCameras"))
-
 (define render-cameras
   (foreign-safe-lambda void "hpsRenderCameras"))
-
-(define unsafe-render-camera
-  (foreign-lambda void "hpsRenderCamera" c-pointer))
 
 (define render-camera
   (foreign-safe-lambda void "hpsRenderCamera" c-pointer))
