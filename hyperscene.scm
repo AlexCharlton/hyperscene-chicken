@@ -75,7 +75,6 @@
    set-light-direction!
    light-spot-angle
    set-light-spot-angle!
-   ambient-light
    set-ambient-light!
    make-material
    set-material-shininess!
@@ -396,14 +395,6 @@
 
 (define set-light-spot-angle!
   (foreign-lambda void "hpsSetLightSpotAngle" c-pointer float))
-
-(define (ambient-light scene)
-(let ((color (make-f32vector 3))
-      (color* ((foreign-lambda c-pointer "hpsAmbientLight" c-pointer) scene)))
-    (f32vector-set! color 0 (pointer-f32-ref color*))
-    (f32vector-set! color 1 (pointer-f32-ref (pointer+ color* 4)))
-    (f32vector-set! color 2 (pointer-f32-ref (pointer+ color* 8)))
-    color))
 
 (define set-ambient-light!
   (foreign-lambda void "hpsSetAmbientLight" c-pointer f32vector))
