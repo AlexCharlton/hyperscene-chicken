@@ -150,11 +150,8 @@ Create a new camera associated with the given scene. `TYPE` must be one of `#:or
 Delete the given camera.
 
     [procedure] (render-camera CAMERA)
-    [procedure] (unsafe-render-camera CAMERA)
 
 Render the given camera. When cameras are rendered, all of the visible nodes are sorted: first into groups of nodes that have an alpha pipline or that don’t. Alpha nodes are sorted by decreasing distance from the camera and rendered last. Non-alpha nodes are sorted by pipeline. Each pipeline is then sorted again by increasing distance from the camera before they are rendered. Drawing the things that are closest to the camera first (“reverse painter” sorting) can help graphics hardware determine when later bits of the scene are hidden, thus saving some rendering time. Not all applications will benefit from this extra step, though, and it can be disabled by defining the feature `#:no-reverse-painter` at compilation time.
-
-`unsafe-render-camera` should only be called when all of the pipelines being used by nodes in the scene do not use callbacks to CHICKEN (i.e. all of the functions in the pipelines are pure C functions).
 
     [procedure] (activate-camera CAMERA)
 
@@ -165,11 +162,8 @@ Add the camera to the list of active cameras (or push it to the back of the list
 Remove the camera from the list of active cameras.
 
     [procedure] (render-cameras)
-    [procedure] (unsafe-render-cameras)
 
 Render all the active cameras.
-
-`unsafe-render-cameras` should only be called when all of the pipelines being used do not use callbacks to CHICKEN (i.e. all of the functions in the pipelines are pure C functions).
 
     [procedure] (resize-cameras)
 
@@ -328,10 +322,6 @@ Set the maximum lights that may be visible at once. Must not be called after the
 
 Scenes that use the lighting extension have an `#f32(r g b)` ambient light associated with them, set by this function.
 
-    [procedure] (ambient-light SCENE)
-
-Returns the `#f32(r g b)` ambient light color of the scene. Modifying this has no effect on the scene’s ambient light.
-
     [procedure] (add-light PARENT COLOR INTENSITY [DIRECTION] [SPOT-ANGLE])
 
 Adds a new light to the given node (or scene) with `#f32(r g b)` `COLOR`. `INTENSITY` is the floating point value associated with the brightness of the light. `DIRECTION` is an `#f32(x y z)` vector that indicates the direction that the light is pointing, defaulting to `#f32(0 0 0)`. `SPOT-ANGLE` indicates the angle in radians that the light is spread over (defaulting to `0`, representing a non-spotlight source). A node is returned that can be moved, rotated, and sized like any other node.
@@ -372,21 +362,25 @@ Returns the angle over which the light is spread.
 
 Returns a pointer to the number of visible lights in the scene currently being rendered.
 
+    [procedure] (current-ambient-light)
+
+Returns a pointer to the `(r g b)` color of ambient light in the scene currently being rendered.
+
     [procedure] (current-light-positions)
 
-A pointer to the array of packed `(x y z)` positions of the visible lights in the scene currently being rendered.
+Returns a pointer to the array of packed `(x y z)` positions of the visible lights in the scene currently being rendered.
 
     [procedure] (current-light-colors)
 
-A pointer to the array of packed `(r g b)` colors of the visible lights in the scene currently being rendered.
+Returns a pointer to the array of packed `(r g b)` colors of the visible lights in the scene currently being rendered.
 
     [procedure] (current-light-intensities)
 
-A pointer to the array of intensities of the visible lights in the scene currently being rendered.
+Returns a pointer to the array of intensities of the visible lights in the scene currently being rendered.
 
     [procedure] (current-light-directions)
 
-A pointer to the array of packed `(x y z spotAngle)` directions and angles of the visible lights in the scene currently being rendered.
+Returns a pointer to the array of packed `(x y z spotAngle)` directions and angles of the visible lights in the scene currently being rendered.
 
     [procedure] (make-material R G B SHININESS)
 
