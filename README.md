@@ -1,7 +1,7 @@
-# hyperscene
-hyperscene is a scene library – made for placing objects in a shared world for the purpose of rendering – for CHICKEN Scheme. hyperscene features a scene graph, cameras with a variety of movement types, frustum culling based on an configurable spatial partitioning system and a lighting extension. hyperscene is target agnostic: it is not bound to any particular rendering target and should work equally well for curses, OpenGL, and anything in between.
+# Hyperscene
+Hyperscene is a scene library – made for placing objects in a shared world for the purpose of rendering – for CHICKEN Scheme. Hyperscene features a scene graph, cameras with a variety of movement types, frustum culling based on an configurable spatial partitioning system and a lighting extension. Hyperscene is target agnostic: it is not bound to any particular rendering target and should work equally well for curses, OpenGL, and anything in between.
 
-hyperscene is a set of bindings to the [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene).
+Hyperscene is a set of bindings to the [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene).
 
 ## Installation
 This repository is a [Chicken Scheme](http://call-cc.org/) egg.
@@ -14,15 +14,15 @@ Various debugging statements are printed (in case you’re wondering how many th
 - miscmacros
 
 ## Documentation
-hyperscene’s scenes rely on a number of elements to be in place before a scene can be rendered. First is the scene itself. A scene could be thought of as the world or coordinate system that serves as the base for all the rendering operations. Second is a node. A node is the “physical” thing that can being rendered. Nodes can be added to scenes, or can be added to each other if you want a node to be defined in terms of its relation to another (hence the scene “graph”). Third is a camera. Cameras have a position and orientation in a scene, as well as a projection. Cameras can be rendered, which renders the part of the scene that they are pointing at. The fourth element that must be present is a pipeline. Pipelines are the collection of functions that explain how to render a node. If a node is to be rendered, it must have a pipeline associated with it.
+Hyperscene’s scenes rely on a number of elements to be in place before a scene can be rendered. First is the scene itself. A scene could be thought of as the world or coordinate system that serves as the base for all the rendering operations. Second is a node. A node is the “physical” thing that can being rendered. Nodes can be added to scenes, or can be added to each other if you want a node to be defined in terms of its relation to another (hence the scene “graph”). Third is a camera. Cameras have a position and orientation in a scene, as well as a projection. Cameras can be rendered, which renders the part of the scene that they are pointing at. The fourth element that must be present is a pipeline. Pipelines are the collection of functions that explain how to render a node. If a node is to be rendered, it must have a pipeline associated with it.
 
 These four elements are all represented as c-pointers. Passing the wrong pointer to the wrong function will result in bad things happening. Sorry.
 
-The basic use of hyperscene is as follows: First you create pipelines and a scene. Then you add nodes to that scene (or to nodes that are already in the scene). These nodes are assigned a pipeline that knows how it can draw them. Then you create a camera associated with that scene, that has a particular position, orientation, and projection. Cameras are then called upon to render the scene.
+The basic use of Hyperscene is as follows: First you create pipelines and a scene. Then you add nodes to that scene (or to nodes that are already in the scene). These nodes are assigned a pipeline that knows how it can draw them. Then you create a camera associated with that scene, that has a particular position, orientation, and projection. Cameras are then called upon to render the scene.
 
     [procedure] (init WINDOW-SIZE-FUN)
 
-Before any other functions can be used (except for pipeline creation), hyperscene must be initialized.
+Before any other functions can be used (except for pipeline creation), Hyperscene must be initialized.
 
 `WINDOW-SIZE-FUN` is a function that returns two values: the width and height of the current window.
 
@@ -50,7 +50,7 @@ Deactivate the given scene.
 Update all active scenes. This must be called every frame in order to make sure all nodes are positioned correctly.
 
 ### Nodes
-Nodes are the elements that are rendered in hyperscene. They have five primary properties:
+Nodes are the elements that are rendered in Hyperscene. They have five primary properties:
 
 - Their parent: which can either be a scene, or another node
 - Their position and orientation: how they are positioned relative to their parent and the world
@@ -75,7 +75,7 @@ Return the scene that the node belongs to.
 
     [procedure] (set-node-bounding-sphere! NODE RADIUS)
 
-Set the radius of the node’s bounding sphere. This is important to set so that hyperscene knows when the node is inside a camera’s bounding volume or not. When a node is created, the bounding sphere radius is initially set to `1`.
+Set the radius of the node’s bounding sphere. This is important to set so that Hyperscene knows when the node is inside a camera’s bounding volume or not. When a node is created, the bounding sphere radius is initially set to `1`.
 
     [procedure] (node-bounding-sphere NODE)
 
@@ -99,7 +99,7 @@ Return a pointer to the node’s quaternion `(x y z w)` that describes the rotat
 
     [procedure] (node-needs-update! NODE)
 
-Nodes need to be informed when they have been modified in such a way that they need to be updated. Most node modification functions (`set-node-position!`, `move-node!`, `set-node-bounding-sphere!`) call this automatically, but hyperscene cannot tell when a node’s rotation quaternion has been modified. Make sure to call `node-needs-update!` after modifying `node-rotation`’s return value.
+Nodes need to be informed when they have been modified in such a way that they need to be updated. Most node modification functions (`set-node-position!`, `move-node!`, `set-node-bounding-sphere!`) call this automatically, but Hyperscene cannot tell when a node’s rotation quaternion has been modified. Make sure to call `node-needs-update!` after modifying `node-rotation`’s return value.
 
     [procedure] (node-transform NODE)
 
@@ -112,7 +112,7 @@ Return a pointer to the node’s user supplied data.
 #### Memory management
     [procedure] (set-node-pool-size! SIZE)
 
-hyperscene uses memory pools to store its data relating to nodes, which makes creation and deletion of nodes and scenes quick. For best performance, set the node pool size to be as large as the greatest number of nodes that will be needed for a scene. Defaults to `4096`.
+Hyperscene uses memory pools to store its data relating to nodes, which makes creation and deletion of nodes and scenes quick. For best performance, set the node pool size to be as large as the greatest number of nodes that will be needed for a scene. Defaults to `4096`.
 
 
 ### Pipelines
@@ -275,7 +275,7 @@ Returns a pointer to the inverse transpose model matrix of the node currently be
 
 
 ### Spatial Partitioning
-hyperscene only renders nodes that are within the bounds of a camera (i.e. it performs view frustum culling). In order for it to efficiently sort through the nodes, a [spatial partitioning](http://en.wikipedia.org/wiki/Space_partitioning) system is used. Different spatial partitioning systems can be used on a per-scene basis. 
+Hyperscene only renders nodes that are within the bounds of a camera (i.e. it performs view frustum culling). In order for it to efficiently sort through the nodes, a [spatial partitioning](http://en.wikipedia.org/wiki/Space_partitioning) system is used. Different spatial partitioning systems can be used on a per-scene basis. 
 
 If you wish to write a new partition interface, see the [Hyperscene](https://github.com/AlexCharlton/Hyperscene) documentation.
 
@@ -295,7 +295,7 @@ Set the memory pool size of the `aabb-tree-interface`. Defaults to `4096`.
 
 
 ### Extensions
-hyperscene features an extension system, so that the rendering of a scene can be augmented in new and exciting ways.
+Hyperscene features an extension system, so that the rendering of a scene can be augmented in new and exciting ways.
 
 Extensions can add special nodes to scenes. If node is created that is given a pointer to an extension in place of a pipeline, that node will not be rendered but will instead be handled by its extension during rendering and updating.
 
@@ -304,7 +304,7 @@ Extensions can add special nodes to scenes. If node is created that is given a p
 Before an extension can be used in a given scene, it must be activated.
 
 #### Lights
-hyperscene supplies an extension that provides a generic lighting system:
+Hyperscene supplies an extension that provides a generic lighting system:
 
     [procedure] (lighting)
 
@@ -403,7 +403,7 @@ Every scene is given a pool from which to allocate lights, the size of which (at
 The [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene) is extensible in C. See [its documentation](https://github.com/AlexCharlton/Hyperscene#writing-your-own-extensions) for details.
 
 ## Examples
-See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/tree/master/examples) to see hyperscene in action.
+See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/tree/master/examples) to see Hyperscene in action.
 
 ## Version history
 ### Version 0.2.0
