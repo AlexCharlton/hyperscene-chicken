@@ -430,8 +430,9 @@ See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/
 
 ## Version history
 ### Version 0.2.0
-8 December 2014
+20 December 2014
 
+* Separate camera updating from rendering
 * Remove `unsafe-render-camera*` functions
 * `current-ambient-light` now takes no argument
 
