@@ -27,6 +27,8 @@
    make-camera
    render-cameras
    render-camera
+   update-cameras
+   update-camera
    activate-camera
    deactivate-camera
    resize-cameras
@@ -49,6 +51,9 @@
    move-camera-forward!
    move-camera-up!
    strafe-camera!
+   camera-view
+   camera-projection
+   camera-view-projection
    current-camera-position
    current-camera-view
    current-camera-projection
@@ -240,6 +245,12 @@
 (define set-camera-view-angle!
   (foreign-safe-lambda void "hpsSetCameraViewAngle" c-pointer float))
 
+(define update-cameras
+  (foreign-lambda void "hpsUpdateCameras"))
+
+(define update-camera
+  (foreign-lambda void "hpsUpdateCamera" c-pointer))
+
 (define render-cameras
   (foreign-safe-lambda void "hpsRenderCameras"))
 
@@ -304,6 +315,15 @@
 
 (define strafe-camera!
   (foreign-lambda void "hpsStrafeCamera" c-pointer float))
+
+(define camera-view
+  (foreign-lambda c-pointer "hpsCameraView" c-pointer))
+
+(define camera-projection
+  (foreign-lambda c-pointer "hpsCameraProjection" c-pointer))
+
+(define camera-view-projection
+  (foreign-lambda c-pointer "hpsCameraViewProjection" c-pointer))
 
 (define (current-camera-position)
   (foreign-value "hpsCurrentCameraPosition" c-pointer))
