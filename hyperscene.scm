@@ -183,7 +183,7 @@
   (foreign-lambda void "hpsSetNodePosition" c-pointer f32vector))
 
 (define node-needs-update!
-  (foreign-lambda void "hpsNodeRotation" c-pointer))
+  (foreign-lambda void "hpsNodeNeedsUpdate" c-pointer))
 
 (define node-rotation
   (foreign-lambda c-pointer "hpsNodeRotation" c-pointer))
