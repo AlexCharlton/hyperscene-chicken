@@ -435,6 +435,7 @@ See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/
 * Separate camera updating from rendering
 * Remove `unsafe-render-camera*` functions
 * `current-ambient-light` now takes no argument
+* `add-light` takes keyword args, not optional
 
 ### Version 0.1.0
 * Initial release
