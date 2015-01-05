@@ -345,9 +345,9 @@ Set the maximum lights that may be visible at once. Must not be called after the
 
 Scenes that use the lighting extension have an `#f32(r g b)` ambient light associated with them, set by this function.
 
-    [procedure] (add-light PARENT COLOR INTENSITY [DIRECTION] [SPOT-ANGLE])
+    [procedure] (add-light PARENT COLOR INTENSITY [direction: direction] [spot-angle: SPOT-ANGLE])
 
-Adds a new light to the given node (or scene) with `#f32(r g b)` `COLOR`. `INTENSITY` is the floating point value associated with the brightness of the light. `DIRECTION` is an `#f32(x y z)` vector that indicates the direction that the light is pointing, defaulting to `#f32(0 0 0)`. `SPOT-ANGLE` indicates the angle in radians that the light is spread over (defaulting to `0`, representing a non-spotlight source). A node is returned that can be moved, rotated, and sized like any other node.
+Adds a new light to the given `PARENT` node (or scene) with `#f32(r g b)` `COLOR`. `INTENSITY` is the floating point value associated with the brightness of the light. `DIRECTION` is an `#f32(x y z)` vector that indicates the direction that the light is pointing, defaulting to `#f32(0 0 0)`. `SPOT-ANGLE` indicates the angle in radians that the light is spread over (defaulting to `0`, representing a non-spotlight source). A node is returned that can be moved, rotated, and sized like any other node.
 
     [procedure] (set-light-color! LIGHT COLOR)
 
