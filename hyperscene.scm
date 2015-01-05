@@ -378,9 +378,13 @@
 
 (define origin (f32vector 0 0 0))
 
-(define (add-light node color intensity #!optional (direction origin) (spot-angle 0))
-  ((foreign-lambda c-pointer "hpsAddLight" c-pointer f32vector float f32vector float)
-   node color intensity direction spot-angle))
+(define (add-light node color intensity #!key (direction origin)
+                   (spot-angle 0) position radius)
+  (let ((light ((foreign-lambda c-pointer "hpsAddLight" c-pointer f32vector float f32vector float)
+                node color intensity direction spot-angle)))
+    (when position (set-node-position! light position))
+    (when radius (set-node-bounding-sphere! light radius))
+    light))
 
 (define (light-color node)
   (let ((color (make-f32vector 3))
