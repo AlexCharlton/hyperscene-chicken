@@ -1,7 +1,7 @@
 # Hyperscene
 Hyperscene is a scene library – made for placing objects in a shared world for the purpose of rendering – for CHICKEN Scheme. Hyperscene features a scene graph, cameras with a variety of movement types, frustum culling based on an configurable spatial partitioning system and a lighting extension. Hyperscene is target agnostic: it is not bound to any particular rendering target and should work equally well for curses, OpenGL, and anything in between.
 
-Hyperscene is a set of bindings to the [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene).
+Hyperscene is a set of bindings to the [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene). It’s fairly rough around the edges for general use in Scheme. It should generally be wrapped in order to make it more palatable. [Hypergiant](http://wiki.call-cc.org/eggref/4/hypergiant) is one such library that wraps Hyperscene for use with OpenGL.
 
 ## Installation
 This repository is a [Chicken Scheme](http://call-cc.org/) egg.
