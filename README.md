@@ -14,7 +14,7 @@ Various debugging statements are printed (in case you’re wondering how many th
 - miscmacros
 
 ## Documentation
-Hyperscene’s scenes rely on a number of elements to be in place before a scene can be rendered. First is the scene itself. A scene could be thought of as the world or coordinate system that serves as the base for all the rendering operations. Second is a node. A node is the “physical” thing that can being rendered. Nodes can be added to scenes, or can be added to each other if you want a node to be defined in terms of its relation to another (hence the scene “graph”). Third is a camera. Cameras have a position and orientation in a scene, as well as a projection. Cameras can be rendered, which renders the part of the scene that they are pointing at. The fourth element that must be present is a pipeline. Pipelines are the collection of functions that explain how to render a node. If a node is to be rendered, it must have a pipeline associated with it.
+Hyperscene’s scenes rely on a number of elements to be in place before a scene can be rendered. First is the scene itself. A **scene** could be thought of as the world or coordinate system that serves as the base for all the rendering operations. Second is a node. A **node** is the “physical” thing that can being rendered. Nodes can be added to scenes, or can be added to each other if you want a node to be defined in terms of its relation to another (hence the scene “graph”). Third is a camera. **Cameras** have a position and orientation in a scene, as well as a projection. Cameras can be rendered, which renders the part of the scene that they are pointing at. The fourth element that must be present is a pipeline. **Pipelines** are the collection of functions that explain how to render a node. If a node is to be rendered, it must have a pipeline associated with it.
 
 These four elements are all represented as c-pointers. Passing the wrong pointer to the wrong function will result in bad things happening. Sorry.
 
@@ -87,7 +87,7 @@ Set the position of the node, relative to its parent, to be the `#f32(x y z)` `P
 
     [procedure] (move-node NODE VECTOR)
 
-Move the node by the `#f32(x y z)` `POINT`.
+Move the node by the `#f32(x y z)` `VECTOR`.
 
     [procedure] (node-position NODE)
 
@@ -112,7 +112,7 @@ Return a pointer to the node’s user supplied data.
 #### Memory management
     [procedure] (set-node-pool-size! SIZE)
 
-Hyperscene uses memory pools to store its data relating to nodes, which makes creation and deletion of nodes and scenes quick. For best performance, set the node pool size to be as large as the greatest number of nodes that will be needed for a scene. Defaults to `4096`.
+Hyperscene uses memory pools to store its data relating to nodes, which makes creation and deletion of nodes and scenes quick. For best performance, set the node pool size to be as large as the greatest number of nodes that will be needed for a scene. When a scene is created with `make-scene` its node pool is set to this size. Defaults to `4096`.
 
 
 ### Pipelines
@@ -120,7 +120,7 @@ Pipelines are structures consisting of three functions: a pre-render function, a
 
 The exception to this is when a pipeline represents an element that could be partially transparent. “Alpha” pipelines get drawn after all the other ones, and the nodes that are associate with alpha pipelines are always drawn in order of decreasing distance from the camera. This ensures that the transparent parts can be rendered correctly.
 
-When targeting OpenGL, one pipeline per shader program is generally desirable. The pre-render function should therefore call `gl:use-program`, while the render function should not. The post-render function can reset any state (e.g. `(gl:use-programogram 0)`, etc).
+When targeting OpenGL, one pipeline per shader program is generally desirable. The pre-render function should therefore call `gl:use-program`, while the render function should not. The post-render function can reset any state (e.g. `(gl:use-program 0)`, etc).
 
     [procedure] (add-pipeline PRE-RENDER RENDER POST-RENDER [ALPHA])
 
@@ -314,13 +314,13 @@ When trees split, they try to split only along those axis where the nodes are mo
 
     [procedure] (set-aabb-tree-pool-size! SIZE)
 
-Set the memory pool size of the `aabb-tree-interface`. Defaults to `4096`.
+Set the memory pool size of the `aabb-tree-interface`. This pool sets the number of trees in the partition interface’s pool, which is initialized for each scene when `make-scene` is called. Defaults to `4096`.
 
 
 ### Extensions
 Hyperscene features an extension system, so that the rendering of a scene can be augmented in new and exciting ways.
 
-Extensions can add special nodes to scenes. If node is created that is given a pointer to an extension in place of a pipeline, that node will not be rendered but will instead be handled by its extension during rendering and updating.
+Extensions can add special nodes to scenes. If a node is created that is given a pointer to an extension in place of a pipeline, that node will not be rendered but will instead be handled by its extension during rendering and updating.
 
     [procedure] (activate-extension SCENE EXTENSION)
 
@@ -419,7 +419,7 @@ Set the shininess value of the given material.
 
     [procedure] (set-light-pool-size! SIZE)
 
-Every scene is given a pool from which to allocate lights, the size of which (at initialization) can be modified by calling this function (defaults to `1024`).
+Every scene is given a pool from which to allocate lights, the size of which can be modified by calling this function before initialization (defaults to `1024`).
 
 
 #### Writing your own extensions
