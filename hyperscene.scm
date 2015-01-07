@@ -411,7 +411,7 @@
   (foreign-lambda void "hpsSetLightDirection" c-pointer f32vector))
 
 (define light-spot-angle
-  (foreign-lambda float "hpsSpotAngle" c-pointer))
+  (foreign-lambda float "hpsLightSpotAngle" c-pointer))
 
 (define set-light-spot-angle!
   (foreign-lambda void "hpsSetLightSpotAngle" c-pointer float))
