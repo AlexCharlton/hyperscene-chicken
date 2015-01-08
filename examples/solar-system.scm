@@ -313,6 +313,7 @@
     (glfw:swap-buffers (glfw:window))
     (update)
     (gl:clear (bitwise-ior gl:+color-buffer-bit+ gl:+depth-buffer-bit+))
+    (update-cameras)
     (render-cameras)
     (check-error)
     (glfw:poll-events)

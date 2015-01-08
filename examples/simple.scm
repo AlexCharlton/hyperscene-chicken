@@ -81,6 +81,7 @@
   (let loop ()
     (glfw:swap-buffers (glfw:window))
     (gl:clear (bitwise-ior gl:+color-buffer-bit+ gl:+depth-buffer-bit+))
+    (update-cameras)
     (render-cameras)
     (check-error)
     (glfw:poll-events)
