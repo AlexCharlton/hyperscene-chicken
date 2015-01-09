@@ -25,4 +25,4 @@
 (install-extension
  'hyperscene
  '("hyperscene.so" "hyperscene.import.so")
- '((version "0.2.1")))
+ '((version "0.2.2")))
