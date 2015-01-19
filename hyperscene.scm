@@ -325,23 +325,23 @@
 (define camera-view-projection
   (foreign-lambda c-pointer "hpsCameraViewProjection" c-pointer))
 
-(define (current-camera-position)
-  (foreign-value "hpsCurrentCameraPosition" c-pointer))
+(define current-camera-position
+  (foreign-lambda c-pointer "hpsCurrentCameraPosition"))
 
-(define (current-camera-view)
-  (foreign-value "hpsCurrentCameraView" c-pointer))
+(define current-camera-view
+  (foreign-lambda c-pointer "hpsCurrentCameraView"))
 
-(define (current-camera-projection)
-  (foreign-value "hpsCurrentCameraProjection" c-pointer))
+(define current-camera-projection
+  (foreign-lambda c-pointer "hpsCurrentCameraProjection"))
 
-(define (current-camera-view-projection)
-  (foreign-value "hpsCurrentCameraViewProjection" c-pointer))
+(define current-camera-view-projection
+  (foreign-lambda c-pointer "hpsCurrentCameraViewProjection"))
 
-(define (current-camera-model-view-projection)
-  (foreign-value "hpsCurrentCameraModelViewProjection" c-pointer))
+(define current-camera-model-view-projection
+  (foreign-lambda c-pointer "hpsCurrentCameraModelViewProjection"))
 
-(define (current-inverse-transpose-model)
-  (foreign-value "hpsCurrentInverseTransposeModel" c-pointer))
+(define current-inverse-transpose-model
+  (foreign-lambda c-pointer "hpsCurrentInverseTransposeModel"))
 
 ;;; Lighting
 (define (lighting)
