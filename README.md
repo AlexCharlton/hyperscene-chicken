@@ -3,6 +3,8 @@ Hyperscene is a scene library – made for placing objects in a shared world for
 
 Hyperscene is a set of bindings to the [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene). It’s fairly rough around the edges for general use in Scheme. It should generally be wrapped in order to make it more palatable. [Hypergiant](http://wiki.call-cc.org/eggref/4/hypergiant) is one such library that wraps Hyperscene for use with OpenGL.
 
+Some rendering options are defined at compile time. See `render-camera` for details.
+
 ## Installation
 This repository is a [Chicken Scheme](http://call-cc.org/) egg.
 
@@ -151,7 +153,11 @@ Delete the given camera.
 
     [procedure] (render-camera CAMERA)
 
-Render the given camera. When cameras are rendered, all of the visible nodes are sorted: first into groups of nodes that have an alpha pipline or that don’t. Alpha nodes are sorted by decreasing distance from the camera and rendered last. Non-alpha nodes are sorted by pipeline. Each pipeline is then sorted again by increasing distance from the camera before they are rendered. Drawing the things that are closest to the camera first (“reverse painter” sorting) can help graphics hardware determine when later bits of the scene are hidden, thus saving some rendering time. Not all applications will benefit from this extra step, though, and it can be disabled by defining the feature `#:no-reverse-painter` at compilation time.
+Render the given camera. When cameras are rendered, all of the visible nodes are sorted: first into groups of nodes that have an alpha pipline or that don’t. 
+
+Alpha nodes are sorted by decreasing distance from the camera and rendered last. There are two sorting schemes that may be employed. The first, and default, scheme is useful when working with one-dimensional alpha objects. It sorts the distance of nodes based only on their origin, not taking into account their bounding sphere. The second scheme, enabled by defining `#:volumetric-alpha`, is useful when working with three-dimensional alpha objects, and sorts distance while taking the bounding sphere into account.
+
+Non-alpha nodes are sorted by pipeline. Each pipeline is then sorted again by increasing distance from the camera before they are rendered. By doing so, the things that are closest to the camera are drawn first (“reverse painter” sorting) which can help graphics hardware determine when later bits of the scene are hidden, thus saving some rendering time. Not all applications will benefit from this extra step, though, and it can be disabled by defining `#:no-reverse-painter` at compilation time.
 
     [procedure] (update-camera CAMERA)
 
