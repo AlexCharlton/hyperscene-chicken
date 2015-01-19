@@ -9,9 +9,8 @@ typedef enum {
 } HPScameraType;
 
 typedef enum {
-    POSITION, LOOK_AT, ORBIT, FIRST_PERSON
+    HPS_POSITION, HPS_LOOK_AT, HPS_ORBIT, HPS_FIRST_PERSON
 } HPScameraStyle;
-
 
 typedef struct node HPSnode;
 typedef struct scene HPSscene;
@@ -80,18 +79,19 @@ HPSpipeline *hpsAddPipeline(void (*preRender)(void *),
 void hpsDeletePipeline(HPSpipeline *pipeline);
 
 /* Cameras */
+HPScamera *hpsCurrentCamera();
 
-extern float *hpsCurrentInverseTransposeModel;
+float *hpsCurrentInverseTransposeModel();
 
-extern float *hpsCurrentCameraPosition;
+float *hpsCurrentCameraPosition();
 
-extern float *hpsCurrentCameraView;
+float *hpsCurrentCameraView();
 
-extern float *hpsCurrentCameraProjection;
+float *hpsCurrentCameraProjection();
 
-extern float *hpsCurrentCameraViewProjection;
+float *hpsCurrentCameraViewProjection();
 
-extern float *hpsCurrentCameraModelViewProjection;
+float *hpsCurrentCameraModelViewProjection();
 
 void hpsUpdateCamera(HPScamera *camera);
 
@@ -165,3 +165,19 @@ void hpsActivateExtension(HPSscene *scene, HPSextension *extension);
 
 void *hpsExtensionData(HPSscene *scene, HPSextension *extension);
 
+void *hpsNodeExtensionData(HPSnode *node);
+
+void hpsSetNodeExtension(HPSnode *node, HPSextension *extension);
+
+/* Sorting */
+int hpsCloserToCamera(const HPScamera *camera, const float *a, const float *b);
+
+int hpsFurtherFromCamera(const HPScamera *camera, const float *a, const float *b);
+
+int hpsFurtherFromCameraRough(const HPScamera *camera, const float *a, const float *b);
+
+int hpsBSCloserToCamera(const HPScamera *camera, const float *a, const float *b);
+
+int hpsBSFurtherFromCamera(const HPScamera *camera, const float *a, const float *b);
+
+int hpsBSFurtherFromCameraRough(const HPScamera *camera, const float *a, const float *b);

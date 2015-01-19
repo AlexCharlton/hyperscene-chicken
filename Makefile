@@ -1,6 +1,6 @@
 # Variables
 TARGET = libhyperscene.so
-SOURCES = hypermath.c vector.c pools.c aabb-tree.c camera.c scene.c
+SOURCES = hypermath.c vector.c pools.c aabb-tree.c camera.c scene.c lighting.c
 
 local_CFLAGS += -O3 -Wall -Iinclude/ -Ihypermath/include/
 
@@ -37,6 +37,10 @@ uninstall:
 	-rm $(PREFIX)/lib/$(TARGET)
 	-rm -R $(PREFIX)/include/hypergiant
 
+test:
+	$(CC) -Wno-builtin-macro-redefined -I . -D __BASE_FILE__=\"test.c\" -o tests test.c src/vector.c src/pools.c
+	./tests
+
 # Cleaning
 clean:
-	-rm -R lib/ build/
+	-rm -R lib/ build/ tests

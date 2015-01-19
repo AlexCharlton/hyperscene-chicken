@@ -10,6 +10,8 @@ Hyperscene uses the [Hypermath](https://github.com/AlexCharlton/hypermath) libra
 
 Various debugging statements are printed (in case you’re wondering how many things are being drawn, or what the partitioning system is doing) when `DEBUG` is defined. E.g. `make -DDEBUG`.
 
+Some rendering options are also defined at compile time: `NO_REVERSE_PAINTER` `ROUGH_ALPHA`, and `VOLUMETRIC_ALPHA`. For an explanation of these options, see `hpsRenderCamera`.
+
 ## Requirements
 None
 
@@ -73,7 +75,7 @@ The following functions are used create, delete, and work with nodes:
                          HPSpipeline *pipeline,
                          void (*deleteFunc)(void *));
 
-Create a new node with the given parent. `parent` can either be a scene or another node. `data` is a user supplied pointer to some data which is then passed to the `pipeline` functions as well as `deleteFunc` when the node is deleted.
+Create a new node with the given parent. `parent` can either be a scene or another node. `data` is a user supplied pointer to some data which is then passed to the `pipeline` functions as well as `deleteFunc` when the node is deleted. If `pipeline` is `NULL`, the node will be invisible. `deleteFunc` may also be `NULL`.
 
      void hpsDeleteNode(HPSnode *node);
 
@@ -158,7 +160,7 @@ The following functions are used create, delete, and work with cameras:
 
      HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene);
 
-Create a new camera associated with the given scene. `type` must be one of `HPS_ORTHO` or `HPS_PERSPECTIVE` for an orthographic or a perspective camera, respectively. `style` must be one of `POSITION`, `LOOK_AT`, `ORBIT`, or `FIRST_PERSON`. New cameras are automatically activated.
+Create a new camera associated with the given scene. `type` must be one of `HPS_ORTHO` or `HPS_PERSPECTIVE` for an orthographic or a perspective camera, respectively. `style` must be one of `HPS_POSITION`, `HPS_LOOK_AT`, `HPS_ORBIT`, or `HPS_FIRST_PERSON`. New cameras are automatically activated.
 
      void hpsDeleteCamera(HPScamera *camera);
 
@@ -166,7 +168,11 @@ Delete the given camera.
 
      void hpsRenderCamera(HPScamera *camera);
 
-Render the given camera. When cameras are rendered, all of the visible nodes are sorted: first into groups of nodes that have an alpha pipline or that don’t. Alpha nodes are sorted by decreasing distance from the camera and rendered last. Non-alpha nodes are sorted by pipeline. Each pipeline is then sorted again by increasing distance from the camera before they are rendered. Drawing the things that are closest to the camera first (“reverse painter” sorting) can help graphics hardware determine when later bits of the scene are hidden, thus saving some rendering time. Not all applications will benefit from this extra step, though, and it can be disabled by defining `NO_REVERSE_PAINTER` at compilation time.
+Render the given camera. When cameras are rendered, all of the visible nodes are sorted: first into groups of nodes that have an alpha pipline or that don’t.
+
+Alpha nodes are sorted by decreasing distance from the camera and rendered last. There are two sorting schemes that may be employed. The first, and default, scheme is useful when working with one-dimensional alpha objects. It sorts the distance of nodes based only on their origin, not taking into account their bounding sphere. The second scheme, enabled by defining `VOLUMETRIC_ALPHA` during compilation, is useful when working with three-dimensional alpha objects, and sorts distance while taking the bounding sphere into account. Each of these schemes has an accurate sorting version (the default) and a rougher but faster sorting version, which can be enabled by defining `ROUGH_ALPHA` during compilation.
+
+Non-alpha nodes are sorted by pipeline. Each pipeline is then sorted again by increasing distance from the camera before they are rendered. By doing so, the things that are closest to the camera are drawn first (“reverse painter” sorting) which can help graphics hardware determine when later bits of the scene are hidden, thus saving some rendering time. Not all applications will benefit from this extra step, though, and it can be disabled by defining `NO_REVERSE_PAINTER` at compilation time.
 
      void hpsUpdateCamera(HPScamera *camera);
 
@@ -285,29 +291,60 @@ Returns a pointer to the `projection * view` matrix of the camera.
 ##### Currently rendering camera
 While rendering, it can be desirable to have pointers to various matrices relating to the camera and node being rendered (e.g. to be used as uniform values). These pointers always point to the relevant value of the camera currently being rendered.
 
-     float *hpsCurrentCameraPosition;
+     float *hpsCurrentCamera();
+
+Return a pointer to the camera currently being rendered.
+
+     float *hpsCurrentCameraPosition();
 
 Returns a pointer to the `(x y z)` position of the camera currently being rendered.
 
-     float *hpsCurrentCameraView;
+     float *hpsCurrentCameraView();
 
 Returns a pointer to the view matrix of the camera currently being rendered.
 
-     float *hpsCurrentCameraProjection;
+     float *hpsCurrentCameraProjection();
 
 Returns a pointer to the projection matrix of the camera currently being rendered.
 
-     float *hpsCurrentCameraViewProjection;
+     float *hpsCurrentCameraViewProjection();
 
 Returns a pointer to the `projection * view` matrix of the camera currently being rendered.
 
-     float *hpsCurrentCameraModelViewProjection;
+     float *hpsCurrentCameraModelViewProjection();
 
 Returns a pointer to the `projection * view * model` matrix of the node currently being rendered.
 
-     float *hpsCurrentInverseTransposeModel;
+     float *hpsCurrentInverseTransposeModel();
 
 Returns a pointer to the inverse transpose model matrix of the node currently being rendered. This matrix is useful for lighting. If it is not wanted, the calculation of this value can be omitted by defining `NO_INVERSE_TRANSPOSE` at compile time.
+
+#### Distance sorting
+A number of functions are defined to be used to sort two objects relative to the distance to a camera.
+
+    int hpsCloserToCamera(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two three element `(X Y Z)` float positions, `a` and `b`, relative to their position to the `camera`. Returns `-1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `1` when `a` is further from the camera. This is a rough-sorting function that compares distance on a dominant-axis basis, which will not always be accurate.
+
+    int hpsFurtherFromCamera(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two three element `(X Y Z)` float positions, `a` and `b`, relative to their position to the `camera`. Returns `1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `-1` when `a` is further from the camera.
+
+    int hpsFurtherFromCameraRough(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two three element `(X Y Z)` float positions, `a` and `b`, relative to their position to the `camera`. Returns `1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `-1` when `a` is further from the camera. This is a rough-sorting function that compares distance on a dominant-axis basis, which will not always be accurate.
+
+    int hpsBSCloserToCamera(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two four element `(X Y Z R)` float positions, `a` and `b`, relative to their position to the `camera`, taking into account the radius of their bounding sphere `R`. Returns `-1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `1` when `a` is further from the camera. This is a rough-sorting function that compares distance on a dominant-axis basis, which will not always be accurate.
+
+    int hpsBSFurtherFromCamera(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two four element `(X Y Z R)` float positions, `a` and `b`, relative to their position to the `camera`, taking into account the radius of their bounding sphere `R`. Returns `1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `-1` when `a` is further from the camera.
+
+    int hpsBSFurtherFromCameraRough(const HPScamera *camera, const float *a, const float *b);
+
+Compares the two four element `(X Y Z R)` float positions, `a` and `b`, relative to their position to the `camera`, taking into account the radius of their bounding sphere `R`. Returns `1` when `a` is closer to the camera than `b`, `0` when the two are the same distance from the camera, and `-1` when `a` is further from the camera. This is a rough-sorting function that compares distance on a dominant-axis basis, which will not always be accurate.
 
 
 ### Spatial Partitioning
@@ -333,7 +370,7 @@ If you wish to write a new partition interface, create a `partitionIterface` str
 ### Extensions
 Hyperscene features an extension system, so that the rendering of a scene can be augmented in new and exciting ways.
 
-Extensions can add special nodes to scenes. If node is created that is given a pointer to an extension in place of a pipeline, that node will not be rendered but will instead be handled by its extension during rendering and updating.
+Extensions can add special nodes to scenes. `hpsSetNodeExtension` is used to associate a node with an extension, so that it can trigger special actions. This node may be invisible if it was initialized with a null pipeline.
 
      void hpsActivateExtension(HPSscene *scene, HPSextension *extension);
 
@@ -342,6 +379,10 @@ Before an extension can be used in a given scene, it must be activated.
      void *hpsExtensionData(HPSscene *scene, HPSextension *extension);
 
 Each scene stores a pointer that corresponds to the data of a given extension. This function will return it.
+
+    void hpsSetNodeExtension(HPSnode *node, HPSextension *extension);
+
+Set the extension that the node is associated with.
 
 #### Lights
 Hyperscene supplies an extension that provides a generic lighting system:
@@ -451,6 +492,12 @@ All of these function pointers *must* be set. `NULL` pointers will be dereferenc
 
 
 ## Version history
+### Version 0.3.0
+* Improve distance-to-camera filtering
+* Prefix camera style enum elements
+* Turn `hpsCurrentCamera***` variables into functions
+* Actually compile the lighting extension
+
 ### Version 0.2.0
 * Separate camera updating from rendering
 * `hpsAmbientLight` -> `hpsCurrentAmbientLight`

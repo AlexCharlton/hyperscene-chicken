@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "scene.h"
 
@@ -45,10 +46,8 @@ static void updateNode(HPSnode *node, HPSscene *scene){
         bs->y = 0;
         bs->z = 0;
         hpmMat4VecMult(node->transform, (float*) bs);
-        if (node->pipeline && 
-            (node->pipeline->isAlpha != 1) && 
-            (node->pipeline->isAlpha != 0)){
-            hpsUpdateNodeExtensions(scene, node);
+        if (node->extension){
+            hpsUpdateExtensionNode(node);
         }
 	scene->partitionInterface->updateNode(&node->partitionData);
         for (i = 0; i < node->children.size; i++){
@@ -89,6 +88,7 @@ HPSnode *hpsAddNode(HPSnode *parent, void *data,
     node->rotation.w = 1.0;
     node->data = data;
     node->pipeline = pipeline;
+    node->extension = NULL;
     node->parent = parent;
     node->delete = deleteFunc;
     node->needsUpdate = true;
@@ -235,9 +235,26 @@ void hpsDeletePipeline(HPSpipeline *pipeline){
 }
 
 /* Extensions */
-// Add a node with the extension as the pipeline to have it passed to visibleNode when rendering
+/* Set node extension to the start of the scene's extension data in the scene->extensions vector, so that it can easily retrieve that data */
+void hpsSetNodeExtension(HPSnode *node, HPSextension *extension){
+    HPSscene *scene = hpsGetScene(node);
+    int i;
+    for (i = 0; i < scene->extensions.size; i += 2){
+        HPSextension *e = (HPSextension *) scene->extensions.data[i];
+        if ((void*) extension == (void*) e){
+            node->extension = &scene->extensions.data[i];
+            return;
+        }
+    }
+    fprintf(stderr, "Node's %p scene does not have extension %p activated\n", node, extension);
+}
 
 void hpsActivateExtension(HPSscene *scene, HPSextension *extension){
+    int i;
+    for (i = 0; i < scene->extensions.size; i += 2){
+        HPSextension *e = (HPSextension *) scene->extensions.data[i];
+        if (e == extension) return;
+    }
     hpsPush(&scene->extensions, (void *) extension);
     hpsPush(&scene->extensions, NULL);
     extension->init(&scene->extensions.data[scene->extensions.size-1]);
@@ -268,28 +285,24 @@ void hpsPostRenderExtensions(HPSscene *scene){
     }
 }
 
-void hpsVisibleNodeExtensions(HPSscene *scene, HPSnode *node){
-    int i;
-    for (i = 0; i < scene->extensions.size; i += 2){
-        HPSextension *e = (HPSextension *) scene->extensions.data[i];
-        if ((void*) node->pipeline == (void*) e)
-            e->visibleNode(scene->extensions.data[i+1], node);
-    }
-}
-
-void hpsUpdateNodeExtensions(HPSscene *scene, HPSnode *node){
-    int i;
-    for (i = 0; i < scene->extensions.size; i += 2){
-        HPSextension *e = (HPSextension *) scene->extensions.data[i];
-        if ((void*) node->pipeline == (void*) e)
-            e->updateNode(scene->extensions.data[i+1], node);
-    }
-}
-
 void hpsDeleteExtensions(HPSscene *scene){
     int i;
     for (i = 0; i < scene->extensions.size; i += 2){
         HPSextension *e = (HPSextension *) scene->extensions.data[i];
         e->delete(scene->extensions.data[i+1]);
     }
+}
+
+void *hpsNodeExtensionData(HPSnode *node){
+    return node->extension[1];
+}
+
+void hpsVisibleExtensionNode(HPSnode *node){
+    HPSextension *e = (HPSextension *) node->extension[0];
+    e->visibleNode(node->extension[1], node);
+}
+
+void hpsUpdateExtensionNode(HPSnode *node){
+    HPSextension *e = (HPSextension *) node->extension[0];
+    e->updateNode(node->extension[1], node);
 }
