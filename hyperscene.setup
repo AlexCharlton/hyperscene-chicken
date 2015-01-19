@@ -12,13 +12,18 @@
     (no-inverse-transpose "-C '-DNO_INVERSE_TRANSPOSE'")
     (else "")))
 
+(define volumetric-alpha?
+  (cond-expand
+    (volumetric-alpha "-C '-DVOLUMETRIC_ALPHA'")
+    (else "")))
+
 (define debug
   (cond-expand
     (debug "-d2 -C '-DDEBUG -g'")
     (else "-d0")))
 
-(compile ,compile-options ,debug ,reverse-painter? ,inverse-transpose? -J -s
-         -I./hyperscene/include/ -I./hyperscene/hypermath/include/
+(compile ,compile-options ,debug ,reverse-painter? ,inverse-transpose? ,volumetric-alpha?
+         -J -s -I./hyperscene/include/ -I./hyperscene/hypermath/include/
          hyperscene.scm ./hyperscene/src/*.c ./hyperscene/hypermath/src/*.c)
 (compile ,compile-options -s hyperscene.import.scm)
 
