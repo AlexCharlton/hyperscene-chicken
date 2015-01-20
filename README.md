@@ -22,10 +22,6 @@ These four elements are all represented as c-pointers. Passing the wrong pointer
 
 The basic use of Hyperscene is as follows: First you create pipelines and a scene. Then you add nodes to that scene (or to nodes that are already in the scene). These nodes are assigned a pipeline that knows how it can draw them. Then you create a camera associated with that scene, that has a particular position, orientation, and projection. Cameras are then called upon to render the scene.
 
-    [procedure] (init)
-
-Before any other functions can be used (except for pipeline creation), Hyperscene must be initialized.
-
 ### Scenes
 Scenes can be either active or inactive. The only difference is that active scenes are updated with a call to `update-scenes`.
 
