@@ -17,7 +17,6 @@ typedef struct scene HPSscene;
 typedef struct camera HPScamera;
 typedef struct pipeline HPSpipeline;
 typedef struct partitionInterface HPSpartitionInterface;
-typedef void (*HPSwindowSizeFun)(int *, int *);
 
 typedef struct HPSextension {
     void (*init)(void **);
@@ -32,7 +31,7 @@ extern unsigned int hpsNodePoolSize;
 
 extern HPSpartitionInterface *hpsPartitionInterface;
 
-void hpsInit(HPSwindowSizeFun windowSizeFun);
+void hpsInit();
 
 HPSscene *hpsGetScene(HPSnode *node);
 
@@ -97,11 +96,19 @@ void hpsUpdateCamera(HPScamera *camera);
 
 void hpsRenderCamera(HPScamera *camera);
 
-HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene);
+HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene, float width, float height);
 
 void hpsSetCameraClipPlanes(HPScamera *camera, float near, float far);
 
 void hpsSetCameraViewAngle(HPScamera *camera, float angle);
+
+void hpsSetCameraViewportRatio(HPScamera *camera, float width, float height);
+
+void hpsSetCameraViewportDimensions(HPScamera *camera, float width, float height);
+
+void hpsSetCameraViewportScreenPosition(HPScamera *camera, float left, float right, float bottom, float top);
+
+void hpsSetCameraViewportOffset(HPScamera *camera, float x, float y);
 
 void hpsDeleteCamera(HPScamera *camera);
 
@@ -145,7 +152,7 @@ float *hpsCameraView(HPScamera *camera);
 
 float *hpsCameraViewProjection(HPScamera *camera);
 
-void hpsResizeCameras();
+void hpsResizeCameras(float width, float height);
 
 void hpsRenderCameras();
 

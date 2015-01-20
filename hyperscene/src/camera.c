@@ -6,14 +6,11 @@
 #include "scene.h"
 #define HALF_PI 1.57079631
 
-// TODO cameras render to different viewport areas
-
 typedef enum {
     RIGHT, LEFT, TOP, BOTTOM, NEAR, FAR
 } Faces;
 
 static HPSvector cameraList, activeCameras, renderQueue, alphaQueue;
-static HPSwindowSizeFun windowSizefun;
 
 static HPScamera currentCamera;
 static float currentInverseTransposeModel[16];
@@ -43,8 +40,6 @@ float *hpsCurrentCameraModelViewProjection(){
 float *hpsCurrentInverseTransposeModel(){
     return currentInverseTransposeModel;
 }
-
-void hpsSetWindowSizeFun(HPSwindowSizeFun fun){ windowSizefun = fun; }
 
 static void addToQueue(Node *node){
     HPSnode *n = (HPSnode *) node->data;
@@ -369,16 +364,35 @@ void hpsRenderCamera(HPScamera *camera){
     *camera = currentCamera; // Copy currentCamera back into camera
 }
 
-static void hpsOrthoCamera(int width, int height, HPScamera *camera){
-    hpmOrtho(width, height, camera->n, camera->f, camera->projection);
+static void hpsOrthoCamera(HPScamera *camera){
+    float width = camera->vw * camera->vwRatio;
+    float height = camera->vh * camera->vhRatio;
+    float r = width * (0.5 + camera->vx);
+    float l = r - width;
+    float t = height * (0.5 + camera->vy);
+    float b = t - height;
+    hpmOrthoViewport(l, r, b, t, camera->n, camera->f, 
+                     camera->vl, camera->vr, camera->vb, camera->vt,
+                     camera->projection);
 }
 
-static void hpsPerspectiveCamera(int width, int height, HPScamera *camera){
-    hpmPerspective(width, height, camera->n, camera->f, camera->viewAngle,
-		   camera->projection);
+static void hpsPerspectiveCamera(HPScamera *camera){
+    float width = camera->vw * camera->vwRatio;
+    float height = camera->vh * camera->vhRatio;
+    float scale = tan(hpmDegreesToRadians(camera->viewAngle * 0.5)) 
+        * camera->n * 2.0;
+    width = ((float) width / (float) height) * scale;
+    height = scale;
+    float r = width * (0.5 + camera->vx);
+    float l = r - width;
+    float t = height * (0.5 + camera->vy);
+    float b = t - height;
+    hpmFrustumViewport(l, r, b, t, camera->n, camera->f,
+                       camera->vl, camera->vr, camera->vb, camera->vt,
+                       camera->projection);
 }
 
-HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene){
+HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *scene, float width, float height){
     HPScamera *camera = malloc(sizeof(struct camera));
     camera->n = HPS_DEFAULT_NEAR_PLANE;
     camera->f = HPS_DEFAULT_FAR_PLANE;
@@ -396,6 +410,12 @@ HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *sce
     camera->rotation.y = 0;
     camera->rotation.z = 0;
     camera->rotation.w = 1;
+    camera->vw = width; camera->vh = height;
+    camera->vwRatio = 1.0; camera->vhRatio = 1.0;
+    camera->vl = -1.0; camera->vr = 1.0;
+    camera->vb = -1.0; camera->vt = 1.0;
+    camera->vx = 0.0; camera->vy = 0.0;
+    camera->viewportIsStatic = false;
     if (type == HPS_ORTHO)
         camera->update = &hpsOrthoCamera;
     else
@@ -404,25 +424,50 @@ HPScamera *hpsMakeCamera(HPScameraType type, HPScameraStyle style, HPSscene *sce
     camera->scene = scene;
     hpsPush(&cameraList, (void *) camera);
     hpsPush(&activeCameras, (void *) camera);
-    int w, h;
-    windowSizefun(&w, &h);
-    camera->update(w, h, camera);
+    camera->update(camera);
     return camera;
 }
 
 void hpsSetCameraClipPlanes(HPScamera *camera, float near, float far){
     camera->n = near;
     camera->f = far;
-    int w, h;
-    windowSizefun(&w, &h);
-    camera->update(w, h, camera);
+    camera->update(camera);
 }
 
 void hpsSetCameraViewAngle(HPScamera *camera, float angle){
     camera->viewAngle = angle;
-    int w, h;
-    windowSizefun(&w, &h);
-    camera->update(w, h, camera);
+    camera->update(camera);
+}
+
+void hpsSetCameraViewportRatio(HPScamera *camera, float width, float height){
+    camera->vwRatio = width;
+    camera->vhRatio = height;
+    camera->update(camera);
+}
+
+void hpsSetCameraViewportDimensions(HPScamera *camera, float width, float height){
+    camera->vw = width;
+    camera->vh = height;
+    camera->viewportIsStatic = true;
+    camera->update(camera);
+}
+
+void hpsSetCameraViewportScreenPosition(HPScamera *camera, float left, float right, float bottom, float top){
+    if ((left < -1.0) || ( left > 1.0) ||
+        (right < -1.0) || ( right > 1.0) ||
+        (bottom < -1.0) || ( bottom > 1.0) ||
+        (top < -1.0) ||( top > 1.0)){
+        fprintf(stderr, "Camera viewport screen position values should be between -1.0 and 1.0.\n");
+        return;
+    }
+    camera->vl = left; camera->vr = right;
+    camera->vb = bottom; camera->vt = top;
+    camera->update(camera);
+}
+
+void hpsSetCameraViewportOffset(HPScamera *camera, float x, float y){
+    camera->vx = x; camera->vy = y;
+    camera->update(camera);
 }
 
 void hpsDeleteCamera(HPScamera *camera){
@@ -550,12 +595,15 @@ void hpsSetCameraRoll(HPScamera *camera, float angle){
     camera->rotation.z = angle;
 }
 
-void hpsResizeCameras(){
-    int i, w, h;
-    windowSizefun(&w, &h);
+void hpsResizeCameras(float width, float height){
+    int i;
     for (i = 0; i < cameraList.size; i++){
 	HPScamera *camera = (HPScamera *) cameraList.data[i];
-	camera->update(w, h, camera);
+        if (!camera->viewportIsStatic){
+            camera->vw = width;
+            camera->vh = height;
+            camera->update(camera);
+        }
     }
 }
 
