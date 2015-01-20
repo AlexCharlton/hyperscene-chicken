@@ -34,6 +34,9 @@
    resize-cameras
    set-camera-clip-planes!
    set-camera-view-angle!
+   set-camera-viewport-ratio!
+   set-camera-viewport-screen-position!
+   set-camera-viewport-offset!
    move-camera!
    set-camera-position!
    camera-position
@@ -91,16 +94,8 @@
 (foreign-declare "#include <hyperscene.h>")
 (foreign-declare "#include <hypersceneLighting.h>")
 
-(define *window-size-fun* (lambda () (values 0 0)))
-
-(define-external (windowSizeFun ((c-pointer int) *x) ((c-pointer int) *y)) void
-  (let-values (((x y) (*window-size-fun*)))
-    (pointer-s32-set! *x x)
-    (pointer-s32-set! *y y)))
-
-(define (init fun)
-  (set! *window-size-fun* fun)
-  ((foreign-lambda void "hpsInit" c-pointer) #$windowSizeFun))
+(define init
+  (foreign-lambda void "hpsInit"))
 
 (define (add-pipeline pre-render render post-render #!optional (alpha? #f))
   ((foreign-lambda c-pointer "hpsAddPipeline"
@@ -212,10 +207,13 @@
 (define +orbit+ 2)
 (define +first-person+ 3)
 
-(define (make-camera type style scene #!key (near 1) (far 10000) (angle 70))
+(define (make-camera type style scene #!key (near 1) (far 10000) (angle 70)
+                     (width 1.0) (height 1.0)
+                     (viewport-width-ratio 1.0) (viewport-height-ratio 1.0)
+                     static-viewport?)
   (let ((camera (set-finalizer!
-                 ((foreign-safe-lambda c-pointer "hpsMakeCamera"
-                    unsigned-int unsigned-int c-pointer)
+                 ((foreign-lambda c-pointer "hpsMakeCamera"
+                    unsigned-int unsigned-int c-pointer float float)
                   (ecase type
                     ((ortho:) +ortho+)
                     ((perspective:) +perspective+))
@@ -224,10 +222,14 @@
                     ((look-at:) +look-at+)
                     ((orbit:) +orbit+)
                     ((first-person:) +first-person+))
-                  scene)
+                  scene width height)
                  delete-camera)))
     (set-camera-clip-planes! camera near far)
     (set-camera-view-angle! camera angle)
+    (set-camera-viewport-ratio! camera viewport-width-ratio viewport-height-ratio)
+    (when static-viewport?
+      ((foreign-lambda void "hpsSetCameraViewportDimensions" c-pointer float float)
+       camera width height))
     camera))
 
 (define delete-camera
@@ -240,10 +242,19 @@
   (foreign-lambda void "hpsActivateCamera" c-pointer))
 
 (define set-camera-clip-planes!
-  (foreign-safe-lambda void "hpsSetCameraClipPlanes" c-pointer float float))
+  (foreign-lambda void "hpsSetCameraClipPlanes" c-pointer float float))
 
 (define set-camera-view-angle!
-  (foreign-safe-lambda void "hpsSetCameraViewAngle" c-pointer float))
+  (foreign-lambda void "hpsSetCameraViewAngle" c-pointer float))
+
+(define set-camera-viewport-ratio!
+  (foreign-lambda void "hpsSetCameraViewportRatio" c-pointer float float))
+
+(define set-camera-viewport-screen-position!
+  (foreign-lambda void "hpsSetCameraViewportScreenPosition" c-pointer float float float float))
+
+(define set-camera-viewport-offset!
+  (foreign-lambda void "hpsSetCameraViewportOffset" c-pointer float float))
 
 (define update-cameras
   (foreign-lambda void "hpsUpdateCameras"))
@@ -258,7 +269,7 @@
   (foreign-safe-lambda void "hpsRenderCamera" c-pointer))
 
 (define resize-cameras
-  (foreign-safe-lambda void "hpsResizeCameras"))
+  (foreign-lambda void "hpsResizeCameras" float float))
 
 (define move-camera!
   (foreign-lambda void "hpsMoveCamera" c-pointer f32vector))
