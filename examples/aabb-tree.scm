@@ -180,7 +180,7 @@
     (delete-cube)))
 
 ;;; Initialization and main loop
-(init (lambda () (glfw:get-window-size (glfw:window))))
+(init)
 
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
@@ -188,7 +188,8 @@
   (gl:depth-func gl:+less+)
   (compile-pipelines)
   (scene (make-scene))
-  (camera (make-camera #:perspective #:first-person (scene)))
+  (camera (make-camera #:perspective #:first-person (scene)
+                       width: 480 height: 480))
   (set-camera-position! (camera) (make-point 0 0 60))
   (let loop ()
     (glfw:swap-buffers (glfw:window))

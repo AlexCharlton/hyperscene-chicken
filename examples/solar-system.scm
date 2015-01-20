@@ -296,7 +296,7 @@
   (update-scenes))
 
 ;;; Initialization and main loop
-(init (lambda () (glfw:get-window-size (glfw:window))))
+(init)
 
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
@@ -307,7 +307,8 @@
   (scene (make-scene))
   (activate-extension (scene) (lighting))
   (set-ambient-light! (scene) (make-point 0.001 0.001 0.001))
-  (camera (make-camera #:perspective #:first-person (scene)))
+  (camera (make-camera #:perspective #:first-person (scene)
+                       width: 480 height: 480))
   (set-camera-position! (camera) (make-point 0 0 130))
   (let loop ()
     (glfw:swap-buffers (glfw:window))

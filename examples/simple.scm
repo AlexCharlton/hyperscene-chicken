@@ -66,7 +66,7 @@
               (foreign-value "&free" c-pointer))))
 
 ;;; Initialization and main loop
-(init (lambda () (glfw:get-window-size (glfw:window))))
+(init)
 
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
@@ -75,7 +75,8 @@
   (compile-pipelines)
   (mesh-make-vao! cube (pipeline-mesh-attributes simple-shader))
   (scene (make-scene))
-  (camera (make-camera #:perspective #:look-at (scene)))
+  (camera (make-camera #:perspective #:look-at (scene)
+                       width: 480 height: 480))
   (set-camera-position! (camera) (make-point 2 2 6))
   (add-cube)
   (let loop ()
