@@ -296,8 +296,6 @@
   (update-scenes))
 
 ;;; Initialization and main loop
-(init)
-
 (glfw:with-window (480 480 "Example" resizable: #f)
   (gl:init)
   (gl:enable gl:+depth-test+)
