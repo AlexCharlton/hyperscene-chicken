@@ -1,6 +1,5 @@
 (module hyperscene
-  (init
-   make-scene
+  (make-scene
    activate-scene
    deactivate-scene
    update-scenes
@@ -95,8 +94,7 @@
 (foreign-declare "#include <hyperscene.h>")
 (foreign-declare "#include <hypersceneLighting.h>")
 
-(define init
-  (foreign-lambda void "hpsInit"))
+((foreign-lambda void "hpsInit"))
 
 (define (add-pipeline pre-render render post-render #!optional (alpha? #f))
   ((foreign-lambda c-pointer "hpsAddPipeline"
