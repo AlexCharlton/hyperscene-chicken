@@ -10,7 +10,7 @@ This repository is a [Chicken Scheme](http://call-cc.org/) egg.
 
 It is part of the [Chicken egg index](http://wiki.call-cc.org/chicken-projects/egg-index-4.html) and can be installed with `chicken-install hyperscene`.
 
-Various debugging statements are printed (in case you’re wondering how many things are being drawn, or what the partitioning system is doing) when the feature `#:debug` is defined at compile-time.
+Various debugging statements are printed (in case you’re wondering how many things are being drawn, or what the partitioning system is doing) when the feature `debug` is defined at compile-time.
 
 ## Requirements
 - miscmacros
@@ -22,11 +22,9 @@ These four elements are all represented as c-pointers. Passing the wrong pointer
 
 The basic use of Hyperscene is as follows: First you create pipelines and a scene. Then you add nodes to that scene (or to nodes that are already in the scene). These nodes are assigned a pipeline that knows how it can draw them. Then you create a camera associated with that scene, that has a particular position, orientation, and projection. Cameras are then called upon to render the scene.
 
-    [procedure] (init WINDOW-SIZE-FUN)
+    [procedure] (init)
 
 Before any other functions can be used (except for pipeline creation), Hyperscene must be initialized.
-
-`WINDOW-SIZE-FUN` is a function that returns two values: the width and height of the current window.
 
 ### Scenes
 Scenes can be either active or inactive. The only difference is that active scenes are updated with a call to `update-scenes`.
@@ -143,9 +141,9 @@ Cameras, aside from having an orientation and position within a given scene, hav
 
 The following functions are used create, delete, and work with cameras:
 
-    [procedure] (make-camera TYPE STYLE SCENE [near: NEAR] [far: FAR] [angle: ANGLE])
+    [procedure] (make-camera TYPE STYLE SCENE [near: NEAR] [far: FAR] [angle: ANGLE] [width: WIDTH] [height: HEIGHT] [viewport-width-ratio: VIEWPORT-WIDTH-RATIO] [viewport-height-ratio: VIEWPORT-HEIGHT-RATIO] [static-viewport?: STATIC-VIEWPORT?])
 
-Create a new camera associated with the given scene. `TYPE` must be one of `#:ortho` or `#:perspective` for an orthographic or a perspective camera, respectively. `STYLE` must be one of `#:position`, `#:look-at`, `#:orbit`, or `#:first-person`. New cameras are automatically activated. `NEAR` is the near plane of the camera, defaulting to `1`. `FAR` is the far plane of the camera, defaulting to `10000`. `ANGLE` is the view-angle, in degrees, for perspective cameras, defaulting to `70`.
+Create a new camera associated with the given scene. `TYPE` must be one of `#:ortho` or `#:perspective` for an orthographic or a perspective camera, respectively. `STYLE` must be one of `#:position`, `#:look-at`, `#:orbit`, or `#:first-person`. New cameras are automatically activated. `NEAR` is the near plane of the camera, defaulting to `1`. `FAR` is the far plane of the camera, defaulting to `10000`. `ANGLE` is the view-angle, in degrees, for perspective cameras, defaulting to `70`. `WIDTH` and `HEIGHT` should be initialized to the size of camera’s viewport. `VIEWPORT-WIDTH-RATIO` and `VIEWPORT-HEIGHT-RATIO` scale the camera’s viewport (its view frustum’s near plane) in the width and height direction. The effects of the scaling persist after `resize-cameras` is called. If `STATIC-VIEWPORT?` is `#t`, the camera’s viewport dimensions will be fixed such that they won’t be changed by `resize-cameras`, although `VIEWPORT-WIDTH-RATIO` and `VIEWPORT-HEIGHT-RATIO` still effect the final viewport size.
 
     [procedure] (delete-camera CAMERA)
 
@@ -180,9 +178,9 @@ Render all the active cameras.
 
 Update all the active cameras.
 
-    [procedure] (resize-cameras)
+    [procedure] (resize-cameras WIDTH HEIGHT)
 
-Modify the projection matrix of all cameras, based on the window dimensions supplied by the `WINDOW-SIZE-CALLBACK` that was passed to `init`. Should be called whenever the window is resized.
+Modify the projection matrix of all cameras, based on the viewport dimensions `WIDTH` and `HEIGHT`. Should be called whenever the window is resized. The viewport dimensions of a camera are scaled by any values passed to `set-camera-viewport-ratio!` or the `viewport-*-ratio` keywords of `make-camera`. If `static-viewport?` was set to `#t` when a camera was created, this function has no effect on it.
 
     [procedure] (set-camera-clip-planes! CAMERA NEAR FAR)
 
@@ -191,6 +189,22 @@ Set the near and far clip planes of the camera. Nodes closer to or further away 
     [procedure] (set-camera-view-angle! CAMERA ANGLE)
 
 Set the viewing angle of the perspective camera to `angle` degrees. This doesn’t have any effect on orthographic cameras.
+
+    [procedure] (set-camera-viewport-ratio! CAMERA WIDTH HEIGHT)
+
+Scale `CAMERA`’s viewport (its view frustum’s near plane) in the width and height direction by `WIDTH` and `HEIGHT`. The effects of the scaling persist after `resize-cameras` is called. This is equivalent to setting the `viewport-*-ratio` keywords of `make-camera`.
+
+    [procedure] (set-camera-viewport-dimensions! CAMERA WIDTH HEIGHT)
+
+Set `CAMERA`’s viewport (its view frustum’s near plane) dimensions to `WIDTH` and `HEIGHT`, and fixes these dimensions such that they will not be changed when `resize-cameras` is called.
+
+    [procedure] (set-camera-viewport-screen-position! CAMERA LEFT RIGHT BOTTOM TOP)
+
+Set the area of the screen that `CAMERA` renders to, defined by the rectangle of `LEFT`, `RIGHT`, `BOTTOM`, `TOP`. These default to the full screen, which is represented by values of `-1, 1, -1, 1`, respectively.
+
+    [procedure] (set-camera-viewport-offset! CAMERA X Y)
+
+Move `CAMERA`’s viewport (its view frustum’s near plane) by `(X, Y)` expressed as a fraction of the viewport’s width and height. This is generally only useful for a perspective projection, when lines should converge not to the middle of the screen, but to another point. Setting `x` to `0.5`, for example, moves the focal centre to the right edge of the viewport.
 
 #### Movement and rotation
     [procedure] (move-camera! CAMERA VECTOR)
