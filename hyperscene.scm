@@ -35,6 +35,7 @@
    set-camera-clip-planes!
    set-camera-view-angle!
    set-camera-viewport-ratio!
+   set-camera-viewport-dimensions!
    set-camera-viewport-screen-position!
    set-camera-viewport-offset!
    move-camera!
@@ -228,8 +229,7 @@
     (set-camera-view-angle! camera angle)
     (set-camera-viewport-ratio! camera viewport-width-ratio viewport-height-ratio)
     (when static-viewport?
-      ((foreign-lambda void "hpsSetCameraViewportDimensions" c-pointer float float)
-       camera width height))
+      (set-camera-viewport-dimensions! camera width height))
     camera))
 
 (define delete-camera
@@ -249,6 +249,9 @@
 
 (define set-camera-viewport-ratio!
   (foreign-lambda void "hpsSetCameraViewportRatio" c-pointer float float))
+
+(define set-camera-viewport-dimensions!
+  (foreign-lambda void "hpsSetCameraViewportDimensions" c-pointer float float))
 
 (define set-camera-viewport-screen-position!
   (foreign-lambda void "hpsSetCameraViewportScreenPosition" c-pointer float float float float))
