@@ -445,6 +445,12 @@ The [Hyperscene C library](https://github.com/AlexCharlton/Hyperscene) is extens
 See the [examples directory](https://github.com/AlexCharlton/hyperscene-chicken/tree/master/examples) to see Hyperscene in action.
 
 ## Version history
+### Version 0.3.0
+20 January 2014
+
+* Add control over camera viewports
+* Improved alpha sorting
+
 ### Version 0.2.0
 20 December 2014
 

@@ -1,4 +1,5 @@
 (repo git "git://github.com/AlexCharlton/hyperscene-chicken.git")
 (uri targz "https://codeload.github.com/AlexCharlton/hyperscene-chicken/tar.gz/{egg-release}")
+(release "0.3.0")
 (release "0.2.3")
 (release "0.2.2")
