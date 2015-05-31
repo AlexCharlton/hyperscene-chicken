@@ -81,7 +81,7 @@ Return the `#f32(x y z radius)` bounding sphere of the node. The bounding sphere
 
 Set the position of the node, relative to its parent, to be the `#f32(x y z)` `POINT`.
 
-    [procedure] (move-node NODE VECTOR)
+    [procedure] (move-node! NODE VECTOR)
 
 Move the node by the `#f32(x y z)` `VECTOR`.
 
