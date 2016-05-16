@@ -1,6 +1,6 @@
 ;; hyperscene.setup -*- scheme -*-
 
-(define compile-options "-O3 -C '-O3'")
+(define compile-options "-O3 -C -O3")
 
 (define reverse-painter?
   (cond-expand
